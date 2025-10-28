@@ -9,6 +9,7 @@ from typing import Any
 from homeassistant.components.ping import PingDataICMPLib, PingDataSubProcess, _can_use_icmp_lib_with_privilege
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import Event, HomeAssistant
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import event
@@ -52,6 +53,7 @@ _LOGGER = logging.getLogger(__name__)
 
 DATA_CONFIG_KEY: HassKey["ConfigData"] = HassKey(DOMAIN)
 
+CONFIG_SCHEMA = cv.empty_config_schema
 
 @dataclass
 class ConfigMonitoredIntegrationData:
