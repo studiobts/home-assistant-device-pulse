@@ -14,14 +14,24 @@ Device Pulse is a custom Home Assistant integration that provides flexible monit
    Device Pulse can automatically detect existing Home Assistant integrations that expose device connection parameters such as `ip_address`, `ipaddress`, `host`, `hostname`, or `address`.\
    You can then select one of these integrations to monitor its devices.
 
-   During setup, you can specify which devices to monitor:
+<p float="left">
+  <img src="images/config_flow_mode.png" height="350" />
+  <img src="images/config_flow_integration.png" height="350" />
+</p>
+
+   During setup, you can specify which devices to monitor:   
 
    - **All valid devices** – all devices with a valid host parameter.
    - **All except listed devices** – exclude specific devices listed during configuration.
    - **Only listed devices** – include only the specified devices.
 
+<p float="left">
+  <img src="images/config_flow_device_selection.png" height="350" />
+</p>
+
 2. **Custom Group Monitoring**\
    You can manually create a custom group and add devices by specifying their **name** and **host (hostname or IP)**. Each group can be configured independently.
+
 
 ### Monitoring Parameters
 
@@ -29,6 +39,10 @@ For both configuration modes, you can define:
 
 - The **number of failed ping attempts** required before a device is considered disconnected.
 - The **interval time** between each ping request.
+
+<p float="left">
+  <img src="images/config_flow_ping_parameters.png" height="350" />
+</p>
 
 ---
 
@@ -41,6 +55,10 @@ You can choose to create additional sensors for each monitored device to track:
 - The number of failed pings.
 - The timestamp of the last offline event.
 - The round-trip time of the most recent ping.
+
+<p float="left">
+  <img src="images/config_flow_optional_sensors.png" height="450" />
+</p>
 
 ### Summary Sensors per Integration or Group
 
