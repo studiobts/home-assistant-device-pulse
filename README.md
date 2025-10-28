@@ -109,16 +109,118 @@ This card displays a visual timeline of connection and disconnection events for 
 ## Example Automation
 
 ```yaml
-# Example: Notify when any monitored device goes offline or comes back online
-# TODO
+alias: Devices Disconnection/Re-Connection Notification
+triggers:
+  - trigger: event
+    event_type: device_pulse_device_came_online
+    event_data: {}
+    id: came-online
+  - trigger: state
+    entity_id:
+      - sensor.devices_offline
+    id: went-offline
+    attribute: went_offline_device_ids
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - went-offline
+        sequence:
+          - action: notify.mobile_app
+            metadata: {}
+            data:
+              message: >-
+                {%- set offline_ids = state_attr('sensor.devices_offline', 'offline_device_ids') -%} 
+                {%- set device_names = offline_ids | map('device_attr', 'name') | list -%}
+                The following devices are OFFLINE:
+                {{ device_names | join(', ') }}
+              data:
+                tag: device-pulse-offline
+      - conditions:
+          - condition: trigger
+            id:
+              - came-online
+        sequence:
+          - action: notify.mobile_app
+            data:
+              message: >-
+                {%- set came_online_id = trigger.event.data.device_id -%} 
+                {%- set device_name = device_attr(came_online_id, 'name_by_user') or device_attr(came_online_id, 'name') -%}
+                This device came back ONLINE: {{ device_name }} 
+mode: single
 ```
 
 ---
 
-## Example Lovelace Card
+## Example With Button Card
 
 ```yaml
-# Example: Card showing the list of currently offline devices
-# TODO
+type: custom:button-card
+entity: sensor.devices_offline
+show_state: false
+show_icon: false
+show_name: false
+styles:
+  card:
+    - padding: 8px
+    - border-radius: 10px
+    - background-color: "#fde9ee"
+    - border-color: "#fbd3dc"
+    - color: "#c0123c"
+  grid:
+    - display: grid
+    - grid-template-columns: auto auto auto 1fr
+    - grid-template-rows: auto auto
+    - grid-template-areas: |
+        "icon entity"
+        "icon list"
+  custom_fields:
+    icon:
+      - grid-area: icon
+      - justify-self: start
+      - width: 60px
+      - align-self: center
+      - margin-right: 10px
+    entity:
+      - grid-area: entity
+      - justify-self: start
+      - align-self: end
+      - text-align: left
+      - font-size: 20px
+      - font-weight: bold
+      - line-height: 35px
+      - text-transform: uppercase
+    list:
+      - grid-area: liste
+      - justify-self: start
+      - align-self: start
+      - text-align: left
+      - font-size: 16px
+      - font-weight: bold
+      - color: var(--secondary-text-color)
+custom_fields:
+  icon: |
+    [[[
+      return '<ha-icon icon="mdi:alert-circle-outline">';
+    ]]]
+  entity: |
+    [[[ return `DEVICES OFFLINE` ]]]
+  list: |
+    [[[
+      var ids = entity.attributes.offline_device_ids || [];
+      var names = ids.map(id => {
+        var device = Object.values(hass.devices).find(d => d.id === id);
+        return device ? device.name : id;
+      });
+      return names.join('<br>');
+    ]]]
 ```
+To show the card only if there are devices disconnected, add a visibility condition
 
+```yaml
+condition: numeric_state
+entity: sensor.devices_offline
+above: 0
+```
