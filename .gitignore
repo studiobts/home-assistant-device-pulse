@@ -1,0 +1,13 @@
+# Python temp files
+__pycache__/
+*.py[cod]
+*.pyo
+# Virtualenv
+.venv/
+venv/
+ha-venv/
+# VS Code
+.vscode/
+.history/
+# MacOS
+.DS_Store

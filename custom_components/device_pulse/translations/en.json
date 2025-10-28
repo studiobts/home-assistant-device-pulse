@@ -1,0 +1,270 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Device Pulse Setup",
+                "description": "**How would you like to set up monitoring?** \n\n- **Use Existing Integration**: Monitor devices from an integration you’ve already configured.\n- **Create Manual Group**: Set up a new group and add devices manually.",
+                "data": {
+                    "entry_type": "Configuration Mode"
+                }
+            },
+            "integration_choice": {
+                "title": "Select Integration",
+                "description": "**Choose which integration you want to monitor.** Only integrations with valid device information will be listed.",
+                "data": {
+                    "integration": "Integration"
+                },
+                "data_description": {
+                    "integration": "Found **{integration_count}** integrations with valid devices."
+                }
+            },
+            "integration_device_selection_mode": {
+                "title": "Device Selection Mode",
+                "description": "Choose which devices from **{integration_name}** should be monitored.",
+                "data": {
+                    "device_selection_mode": "Devices To Monitor"
+                }
+            },
+            "integration_select_excluded_devices": {
+                "title": "Device Selection",
+                "description": "**Pick the devices you don’t want to monitor** for integration **{integration_name}**. All other valid devices will be included automatically.",
+                "data": {
+                    "devices": "Devices"
+                }
+            },
+            "integration_select_included_devices": {
+                "title": "Device Selection",
+                "description": "**Pick the devices you want to monitor** for integration **{integration_name}**. Only these devices will be included.",
+                "data": {
+                    "devices": "Devices"
+                }
+            },
+            "integration_summary": {
+                "title": "Configuration Summary",
+                "description": "**Integration:** {integration_name}\n**Devices:** {device_summary}\n**Ping Settings:**\n- Failed Pings Before Offline: {ping_attempts_before_failure}\n- Ping Interval: {ping_interval} seconds\n\n**Sensors:** {sensors}\n\n⏱️ **Offline Detection Time:** about {detection_time}\n\nPress Submit to complete the configuration."
+            },
+            "custom_group_info": {
+                "title": "Create Devices Group",
+                "description": "Enter a name for the new devices group. You’ll be able to add devices to this group in the next step.",
+                "data": {
+                    "group_name": "Group Name"
+                },
+                "data_description": {
+                    "group_name": "The name that will identify this monitoring group."
+                }
+            },
+            "custom_group_add_device": {
+                "title": "Add Device to Group",
+                "description": "Add a new device to this group by specifying its name and host. The host must be a valid hostname or IP address.",
+                "data": {
+                    "group_device_name": "Device Name",
+                    "group_device_host": "Host"
+                },
+                "data_description": {
+                    "group_device_name": "A friendly name to identify the device.",
+                    "group_device_host": "The hostname or IP address of the device to monitor."
+                }
+            },
+            "custom_group_add_device_or_continue": {
+                "title": "Add a New Devices or Continue",
+                "description": "Choose whether you want to add another device or continue to next steps.",
+                "data": {
+                    "group_add_device_or_continue": "Action"
+                }
+            },
+            "custom_group_summary": {
+                "title": "Group Summary",
+                "description": "**Group:** {group_name}\n**Devices:**\n{group_devices_list}\n\n**Ping Settings:**\n- Failed Pings Before Offline: {ping_attempts_before_failure}\n- Ping Interval: {ping_interval} seconds\n\n**Sensors:** {sensors}\n\n⏱️ **Offline Detection Time:** about {detection_time}\n\nPress Submit to complete the configuration."
+            },
+            "monitor_parameters": {
+                "title": "Ping Parameters",
+                "description": "**Set the rules for how devices are monitored through ping.** Define how many failed pings are needed before a device is considered offline, and how often each device should be pinged.",
+                "data": {
+                    "ping_attempts_before_failure": "Failed Pings Before Offline",
+                    "ping_interval": "Ping Interval"
+                },
+                "data_description": {
+                    "ping_attempts_before_failure": "Number of consecutive failed pings before considering the device offline",
+                    "ping_interval": "Time between ping checks"
+                }
+            },
+            "monitor_sensors": {
+                "title": "Optional Sensors Configuration",
+                "description": "You can enable additional sensors to get more detailed monitoring information. Choose which optional sensors you want to create.",
+                "data": {
+                    "sensors_integration_summary_enabled": "Summary Sensors",
+                    "sensors_failed_pings_enabled": "Failed Ping Counter Sensor",
+                    "sensors_disconnected_since_enabled": "Disconnected Since Timestamp Sensor",
+                    "sensors_last_response_time_enabled": "Last Ping Response Time Sensor"
+                },
+                "data_description": {
+                    "sensors_integration_summary_enabled": "Create summary sensors for {subject} group, showing the number of monitored devices and the number of offline devices",
+                    "sensors_failed_pings_enabled": "Create a sensor that shows the number of consecutive failed pings for each device.",
+                    "sensors_disconnected_since_enabled": "Create a sensor that records the time when a device went offline.",
+                    "sensors_last_response_time_enabled": "Create a sensor that shows the response time of the last successful ping."
+                }
+            }
+        },
+        "error": {
+            "no_integrations_selected": "Please select at least one integration",
+            "select_at_least_one_device": "Please select at least one device",
+            "invalid_hostname_or_ip": "Host field is not a valid Hostname or IP Address",
+            "unknown": "Unknown error occurred"
+        },
+        "abort": {
+            "already_configured": "This integration is already configured",
+            "no_supported_integrations": "No integrations found with valid devices",
+            "all_integrations_configured": "All available integrations are already configured",
+            "selected_integration_not_found": "Selected integration not found",
+            "no_config_flow_available": "Config flow not available for config entry",
+            "unknown_config_entry_type": "Unknown config entry type"
+        }
+    },
+    "options": {
+        "step": {
+            "integration_device_selection_mode": {
+                "title": "Device Selection Mode",
+                "description": "Choose which devices from **{integration_name}** should be monitored.",
+                "data": {
+                    "device_selection_mode": "Devices To Monitor"
+                }
+            },
+            "integration_select_excluded_devices": {
+                "title": "Device Selection",
+                "description": "**Pick the devices you don’t want to monitor** for integration **{integration_name}**. All other valid devices will be included automatically.",
+                "data": {
+                    "devices": "Devices"
+                }
+            },
+            "integration_select_included_devices": {
+                "title": "Device Selection",
+                "description": "**Pick the devices you want to monitor** for integration **{integration_name}**. Only these devices will be included.",
+                "data": {
+                    "devices": "Devices"
+                }
+            },
+            "integration_summary": {
+                "title": "Configuration Summary",
+                "description": "**Integration:** {integration_name}\n**Devices:** {device_summary}\n**Ping Settings:**\n- Failed Pings Before Offline: {ping_attempts_before_failure}\n- Ping Interval: {ping_interval} seconds\n\n**Sensors:** {sensors}\n\n⏱️ **Offline Detection Time:** about {detection_time}\n\nPress Submit to complete the configuration."
+            },
+            "custom_group_edit_action": {
+                "title": "Edit Devices Group",
+                "description": "Choose what you want to modify in this group. You can manage devices or adjust the monitoring settings.",
+                "data": {
+                    "group_edit_action": "Action"
+                }
+            },
+            "custom_group_add_device": {
+                "title": "Add Device to Group",
+                "description": "Add a new device to this group by specifying its name and host. The host must be a valid hostname or IP address.",
+                "data": {
+                    "group_device_name": "Device Name",
+                    "group_device_host": "Host"
+                },
+                "data_description": {
+                    "group_device_name": "A friendly name to identify the device.",
+                    "group_device_host": "The hostname or IP address of the device to monitor."
+                }
+            },
+            "custom_group_remove_devices": {
+                "title": "Remove Devices",
+                "description": "Select the devices you want to remove from this group. Once confirmed, the device will no longer be monitored.",
+                "data": {
+                    "devices": "Devices to Remove"
+                }
+            },
+            "custom_group_update_device_selection": {
+                "title": "Select Device to Edit",
+                "description": "Choose the device you want to edit. You’ll be able to update its parameters in the next step.",
+                "data": {
+                    "device": "Device to Edit"
+                }
+            },
+            "custom_group_update_device_data": {
+                "title": "Edit Device Parameters",
+                "description": "Update the details of the device **{device_name}**. You can change settings used for monitoring.",
+                "data": {
+                    "group_device_host": "Host"
+                },
+                "data_description": {
+                    "group_device_host": "The hostname or IP address of the device to monitor."
+                }
+            },
+            "custom_group_summary": {
+                "title": "Group Summary",
+                "description": "**Group:** {group_name}\n**Devices:**\n{group_devices_list}\n\n**Ping Settings:**\n- Failed Pings Before Offline: {ping_attempts_before_failure}\n- Ping Interval: {ping_interval} seconds\n\n**Sensors:** {sensors}\n\n⏱️ **Offline Detection Time:** about {detection_time}\n\nPress Submit to complete the configuration."
+            },
+            "monitor_parameters": {
+                "title": "Ping Parameters",
+                "description": "**Set the rules for how devices are monitored through ping.** Define how many failed pings are needed before a device is considered offline, and how often each device should be pinged.",
+                "data": {
+                    "ping_attempts_before_failure": "Failed Pings Before Offline",
+                    "ping_interval": "Ping Interval"
+                },
+                "data_description": {
+                    "ping_attempts_before_failure": "Number of consecutive failed pings before considering the device offline",
+                    "ping_interval": "Time between ping checks"
+                }
+            },
+            "monitor_sensors": {
+                "title": "Optional Sensors Configuration",
+                "description": "You can enable additional sensors to get more detailed monitoring information. Choose which optional sensors you want to create.",
+                "data": {
+                    "sensors_integration_summary_enabled": "Summary Sensors",
+                    "sensors_failed_pings_enabled": "Failed Ping Counter Sensor",
+                    "sensors_disconnected_since_enabled": "Disconnected Since Timestamp Sensor",
+                    "sensors_last_response_time_enabled": "Last Ping Response Time Sensor"
+                },
+                "data_description": {
+                    "sensors_integration_summary_enabled": "Create summary sensors for {subject} group, showing the number of monitored devices and the number of offline devices",
+                    "sensors_failed_pings_enabled": "Create a sensor that shows the number of consecutive failed pings for each device.",
+                    "sensors_disconnected_since_enabled": "Create a sensor that records the time when a device went offline.",
+                    "sensors_last_response_time_enabled": "Create a sensor that shows the response time of the last successful ping."
+                }
+            }
+        },
+        "error": {
+            "select_at_least_one_device": "Please select at least one device",
+            "invalid_hostname_or_ip": "Host field is not a valid Hostname or IP Address",
+            "unknown": "Unknown error occurred"
+        },
+        "abort": {
+            "no_options_flow_available": "No options flow available for config entry",
+            "unknown_config_entry_type": "Unknown config entry type"
+        }
+    },
+    "selector": {
+        "device_selection_mode": {
+            "options": {
+                "all": "All Devices – Monitor every device with a valid host",
+                "exclude": "Exclude Some Devices – Monitor all devices except the ones you select in the next step.",
+                "include": "Only Selected Devices – Monitor only the devices you select in the next step."
+            }
+        },
+        "entry_type": {
+            "options": {
+                "custom_group": "Create Manual Group",
+                "integration": "Use Existing Integration"
+            }
+        },
+        "group_edit_action": {
+            "options": {
+                "group_edit_add_device": "Add New Device",
+                "group_edit_remove_devices": "Remove Devices",
+                "group_edit_update_device": "Update Existing Device",
+                "group_edit_change_settings": "Change Group Settings (Ping and Options Sensors)"
+            }
+        },
+        "group_add_device_or_continue": {
+            "options": {
+              "continue": "Continue to the Next Steps",
+              "add_device": "Add Another Device"
+            }
+        },
+        "ping_attempts_before_failure": {
+            "unit_of_measurement": {
+                "seconds": "seconds"
+            }
+        }
+    }
+}

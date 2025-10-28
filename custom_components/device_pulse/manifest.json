@@ -1,0 +1,15 @@
+{
+  "domain": "device_pulse",
+  "name": "Device Pulse",
+  "codeowners": [
+    "@studiobts"
+  ],
+  "documentation": "https://github.com/studiobts/home-assistant-device-pulse",
+  "issue_tracker": "https://github.com/studiobts/home-assistant-device-pulse/issues",
+  "version": "1.0.0",
+  "iot_class": "local_polling",
+  "config_flow": true,
+  "requirements": [
+    "icmplib==3.0"
+  ]
+}
