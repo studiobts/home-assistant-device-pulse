@@ -156,6 +156,10 @@ mode: single
 
 ## Example With Button Card
 
+<p float="left">
+  <img src="images/custom_button_card_example.png" />
+</p>
+
 ```yaml
 type: custom:button-card
 entity: sensor.devices_offline
