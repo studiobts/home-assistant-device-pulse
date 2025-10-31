@@ -53,7 +53,7 @@ _LOGGER = logging.getLogger(__name__)
 
 DATA_CONFIG_KEY: HassKey["ConfigData"] = HassKey(DOMAIN)
 
-CONFIG_SCHEMA = cv.empty_config_schema
+CONFIG_SCHEMA = cv.empty_config_schema(DOMAIN)
 
 @dataclass
 class ConfigMonitoredIntegrationData:
