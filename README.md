@@ -1,8 +1,35 @@
 # Device Pulse
 
+## README in Progress
+
+This README file is currently a work in progress.  
+Some sections may be incomplete or subject to change. 
+
+---
+
 ## Introduction
 
 Device Pulse is a custom Home Assistant integration that provides flexible monitoring of IP-based devices. It offers two configuration modes to track network device availability through ping checks and automatically generates summary sensors for quick visibility of connection states.
+
+---
+
+## Installation
+
+#### Method 1: HACS (Recommended)
+
+1. Install via HACS (Home Assistant Community Store)
+2. Restart Home Assistant
+3. Add the integration through the UI
+
+#### Method 2: Manual Installation
+
+1. Download this repository
+2. Copy the `device_pulse` folder to your Home Assistant's `custom_components` directory:
+   ```
+   /config/custom_components/device_pulse/
+   ```
+3. Restart Home Assistant
+4. Add the integration through the UI
 
 ---
 
@@ -228,3 +255,7 @@ condition: numeric_state
 entity: sensor.devices_offline
 above: 0
 ```
+
+## Support
+
+For issues and feature requests, please visit the [GitHub repository](https://github.com/studiobts/home-assistant-device-pulse).
