@@ -132,7 +132,7 @@ These events can be used in automations to trigger notifications, log changes, o
   <img src="images/timeline_card_horizontal.png" width="100%" />
 </p>
 
-A companion custom Lovelace card named `device-pulse-timeline` is available in the repository [https://github.com/studiobts/home-assistant-device-pulse-timeline-card](https://github.com/studiobts/home-assistant-device-pulse-timeline-card).
+A companion custom Lovelace card named `device-pulse-timeline-card` is available in the repository [https://github.com/studiobts/device-pulse-timeline-card](https://github.com/studiobts/device-pulse-timeline-card).
 This card displays a visual timeline of connection and disconnection events for each monitored device, providing an intuitive historical view of network stability and device uptime.
 
 The card can be added to your dashboard as a standard custom card once installed and configured through HACS or manual setup.
