@@ -21,6 +21,8 @@ Device Pulse is a custom Home Assistant integration that provides flexible monit
 2. Restart Home Assistant
 3. Add the integration through the UI
 
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=studiobts&repository=home-assistant-device-pulse)
+
 #### Method 2: Manual Installation
 
 1. Download this repository
@@ -135,6 +137,8 @@ This card displays a visual timeline of connection and disconnection events for 
 
 ## Example Automation
 
+Sends a notification to the mobile app when one or more devices go offline, keeps that notification updated with the current list of offline devices or clears it when all devices are back online, and sends an additional notification each time a device reconnects.
+
 ```yaml
 alias: Devices Disconnection/Re-Connection Notification
 triggers:
@@ -155,28 +159,47 @@ actions:
             id:
               - went-offline
         sequence:
-          - action: notify.mobile_app
-            metadata: {}
-            data:
-              message: >-
-                {%- set offline_ids = state_attr('sensor.devices_offline', 'offline_device_ids') -%} 
-                {%- set device_names = offline_ids | map('device_attr', 'name') | list -%}
-                The following devices are OFFLINE:
-                {{ device_names | join(', ') }}
-              data:
-                tag: device-pulse-offline
+          - if:
+              - condition: template
+                value_template: >-
+                  {{ state_attr('sensor.devices_offline', 'offline_device_ids')
+                  | length > 0 }}
+                alias: There are devices offline
+            then:
+              - action: notify.<MY_MOBILE_APP>
+                metadata: {}
+                data:
+                  message: >-
+                    {%- set offline_ids = state_attr('sensor.devices_offline', 'offline_device_ids') -%} 
+                    {%- set device_names = offline_ids | map('device_attr', 'name') | list -%}
+                    Following devices are OFFLINE:  
+
+                    {{ device_names | join(', ') }}
+                  data:
+                    tag: device-pulse-offline
+                alias: Send or Update Notification
+            else:
+              - alias: Clear Notification
+                action: notify.<MY_MOBILE_APP>
+                metadata: {}
+                data:
+                  message: clear_notification
+                  data:
+                    tag: device-pulse-offline
+                    clear_notification: true
       - conditions:
           - condition: trigger
             id:
               - came-online
         sequence:
-          - action: notify.mobile_app
+          - action: notify.<MY_MOBILE_APP>
             data:
               message: >-
                 {%- set came_online_id = trigger.event.data.device_id -%} 
                 {%- set device_name = device_attr(came_online_id, 'name_by_user') or device_attr(came_online_id, 'name') -%}
                 This device came back ONLINE: {{ device_name }} 
-mode: single
+mode: parallel
+max: 5
 ```
 
 ---
