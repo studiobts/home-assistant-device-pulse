@@ -516,6 +516,9 @@ class DevicePingMonitorConfigFlow(
             else:
                 return self.async_abort(reason="unknown_config_entry_type")
 
+        # Reset custom group devices
+        self.custom_group_devices = []
+
         data_schema = vol.Schema(
             {
                 vol.Required(CONF_ENTRY_TYPE, default=None): selector.SelectSelector(
