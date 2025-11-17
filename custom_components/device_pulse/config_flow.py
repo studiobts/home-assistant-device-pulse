@@ -2,7 +2,6 @@
 
 import abc
 import copy
-from email.policy import default
 from typing import Any, Protocol, runtime_checkable
 
 import voluptuous as vol
