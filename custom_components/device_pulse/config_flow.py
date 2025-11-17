@@ -87,7 +87,7 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
     custom_group_name: str | None = None
     custom_group_devices: list[dict[str, str]] = []
     custom_group_edit_action = None
-    custom_group_dit_update_device_id = None
+    custom_group_edit_update_device_id = None
 
     ping_attempts_before_failure: int = DEFAULT_PING_ATTEMPTS_BEFORE_FAILURE
     ping_interval: int = DEFAULT_PING_INTERVAL
@@ -779,7 +779,7 @@ class DevicePingMonitorOptionsFlow(
 
     async def async_step_custom_group_update_device_selection(self, user_input: dict[str, Any] | None = None):
         if user_input is not None:
-            self.custom_group_dit_update_device_id = user_input.get("device")
+            self.custom_group_edit_update_device_id = user_input.get("device")
 
             return await self.async_step_custom_group_update_device_data()
 
@@ -819,7 +819,7 @@ class DevicePingMonitorOptionsFlow(
                 errors["base"] = "invalid_hostname_or_ip"
             else:
                 for device in self.custom_group_devices:
-                    if device.get(CONF_GROUP_DEVICE_ID) == self.custom_group_dit_update_device_id:
+                    if device.get(CONF_GROUP_DEVICE_ID) == self.custom_group_edit_update_device_id:
                         device.update({
                             CONF_GROUP_DEVICE_HOST: str(user_input[CONF_GROUP_DEVICE_HOST]),
                         })
@@ -829,7 +829,7 @@ class DevicePingMonitorOptionsFlow(
         device_selected = next((
             device
             for device in self.custom_group_devices
-            if device.get(CONF_GROUP_DEVICE_ID) == self.custom_group_dit_update_device_id), None)
+            if device.get(CONF_GROUP_DEVICE_ID) == self.custom_group_edit_update_device_id), None)
         device_registry = dr.async_get(self.hass)
         device = device_registry.async_get_device(identifiers={(DOMAIN, device_selected.get(CONF_GROUP_DEVICE_ID))})
 
