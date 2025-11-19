@@ -30,6 +30,7 @@ class IntegrationData:
     domain: str
     friendly_name: str
     device_count: int
+    custom_group: bool
 
 async def get_valid_integrations_for_monitoring(hass: HomeAssistant) -> dict[str, IntegrationData]:
     """Find all integrations that have devices with a hostname or IP address in the configuration."""
@@ -57,7 +58,7 @@ async def get_valid_integrations_for_monitoring(hass: HomeAssistant) -> dict[str
         if has_host and config_entry.domain not in integrations:
             # Get the friendly name of the integration
             friendly_name = await _get_integration_name(config_entry.domain)
-            integrations[config_entry.domain] = IntegrationData(config_entry.domain, friendly_name, 0)
+            integrations[config_entry.domain] = IntegrationData(config_entry.domain, friendly_name, 0, False)
 
         if has_host:
             # Increment the device count for the integration

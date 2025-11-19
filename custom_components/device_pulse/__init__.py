@@ -171,7 +171,7 @@ async def async_setup_entry(
                 devices.append(device)
 
             domain = f"{DOMAIN}_group_{group_id}"
-            integration = utils.IntegrationData(domain, group_name, len(devices))
+            integration = utils.IntegrationData(domain, group_name, len(devices), True)
 
             device_mode = None
             selected_devices = []
