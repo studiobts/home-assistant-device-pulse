@@ -48,6 +48,15 @@ NETWORK_SUMMARY_TOTAL_DEVICES_OFFLINE_COUNT = f"{DOMAIN}_network_summary_total_d
 INTEGRATION_SUMMARY_TOTAL_DEVICES_COUNT = f"{DOMAIN}_{{platform}}_platform_total_devices_count"
 INTEGRATION_SUMMARY_TOTAL_DEVICES_OFFLINE_COUNT = f"{DOMAIN}_{{platform}}_platform_total_devices_offline_count"
 
+ENTITY_ATTR_INTEGRATION_DOMAIN = "integration_domain"
+ENTITY_ATTR_INTEGRATION_NAME = "integration_name"
+ENTITY_ATTR_INTEGRATION_CUSTOM_GROUP = "integration_custom_group"
+ENTITY_ATTR_DEVICE_ID = "device_id"
+ENTITY_ATTR_HOST = "host"
+ENTITY_ATTR_TAG = "tag"
+ENTITY_ATTR_STATE_SINCE = "state_since"
+ENTITY_ATTR_PINGS_FAILED = "pings_failed"
+
 ENTITY_TAG_PING_STATUS = "ping_status"
 ENTITY_TAG_PINGS_FAILED_COUNT = "pings_failed_count"
 ENTITY_TAG_DISCONNECTED_SINCE = "disconnected_since"

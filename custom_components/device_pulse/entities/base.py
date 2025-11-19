@@ -4,7 +4,15 @@ import abc
 import logging
 
 from custom_components.device_pulse.coordinator import DevicePingCoordinator
-from custom_components.device_pulse.const import DOMAIN
+from custom_components.device_pulse.const import (
+    DOMAIN,
+    ENTITY_ATTR_INTEGRATION_DOMAIN,
+    ENTITY_ATTR_INTEGRATION_NAME,
+    ENTITY_ATTR_INTEGRATION_CUSTOM_GROUP,
+    ENTITY_ATTR_DEVICE_ID,
+    ENTITY_ATTR_TAG,
+    ENTITY_ATTR_HOST
+)
 from custom_components.device_pulse.utils import IntegrationData
 
 from homeassistant.helpers import device_registry as dr
@@ -12,14 +20,17 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 _LOGGER = logging.getLogger(__name__)
 
-ATTR_INTEGRATION = "integration"
-ATTR_HOST = "host"
-ATTR_TAG = "tag"
-
 class BaseCoordinatorEntity(CoordinatorEntity[DevicePingCoordinator], abc.ABC):
     """Base class for sensors."""
 
-    _unrecorded_attributes = frozenset({ATTR_INTEGRATION, ATTR_HOST, ATTR_TAG})
+    _unrecorded_attributes = frozenset({
+        ENTITY_ATTR_INTEGRATION_DOMAIN,
+        ENTITY_ATTR_INTEGRATION_NAME,
+        ENTITY_ATTR_INTEGRATION_CUSTOM_GROUP,
+        ENTITY_ATTR_DEVICE_ID,
+        ENTITY_ATTR_HOST,
+        ENTITY_ATTR_TAG
+    })
 
     def __init__(
         self,
@@ -69,9 +80,12 @@ class BaseCoordinatorEntity(CoordinatorEntity[DevicePingCoordinator], abc.ABC):
     def extra_state_attributes(self) -> dict:
         """Return additional attributes."""
         return {
-            ATTR_INTEGRATION: self._integration.domain,
-            ATTR_HOST: self.coordinator.ping.ip_address,
-            ATTR_TAG: self._tag,
+            ENTITY_ATTR_INTEGRATION_DOMAIN: self._integration.domain,
+            ENTITY_ATTR_INTEGRATION_NAME: self._integration.friendly_name,
+            ENTITY_ATTR_INTEGRATION_CUSTOM_GROUP: self._integration.custom_group,
+            ENTITY_ATTR_DEVICE_ID: self.device_entry.id,
+            ENTITY_ATTR_HOST: self.coordinator.ping.ip_address,
+            ENTITY_ATTR_TAG: self._tag,
         }
 
     @property
