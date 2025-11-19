@@ -126,7 +126,7 @@ These events can be used in automations to trigger notifications, log changes, o
 
 ---
 
-## Device Pulse Timeline Custom Card
+## Device Pulse Timeline Card
 
 <p float="left">
   <img src="images/timeline_card_horizontal.png" width="100%" />
@@ -134,6 +134,25 @@ These events can be used in automations to trigger notifications, log changes, o
 
 A companion custom Lovelace card named `device-pulse-timeline-card` is available in the repository [https://github.com/studiobts/device-pulse-timeline-card](https://github.com/studiobts/device-pulse-timeline-card).
 This card displays a visual timeline of connection and disconnection events for each monitored device, providing an intuitive historical view of network stability and device uptime.
+
+The card can be added to your dashboard as a standard custom card once installed and configured through HACS or manual setup.
+
+---
+
+## Device Pulse Table Card
+
+<p float="left">
+  <img src="images/table_card.png" width="100%" />
+</p>
+
+A companion custom Lovelace card named `device-pulse-table-card` is available in the repository [https://github.com/studiobts/device-pulse-table-card](https://github.com/studiobts/device-pulse-table-card).
+
+This card displays a table view of devices monitored through the integration, designed to visualize network health data collected. It transforms raw connectivity metrics into an interactive, real-time table, allowing users to monitor device status, latency, and stability at a glance.
+Key capabilities include:
+- **Real-Time Updates**: Leverages Home Assistant WebSockets to display live changes in connectivity and response times without page reloads.
+- **Advanced Organization**: offers flexible grouping by integration and status-based filtering (Online/Offline) to easily manage large numbers of devices.
+- **Customizable Layout**: Fully configurable via the visual editor, allowing you to toggle specific columns—such as Host, Last Response Time, or Pings Failed—to suit your monitoring needs.
+- **Interactive Interface**: Supports dynamic sorting and text filtering, with direct access to standard "more-info" dialogs for detailed device history.
 
 The card can be added to your dashboard as a standard custom card once installed and configured through HACS or manual setup.
 
