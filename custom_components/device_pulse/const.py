@@ -49,7 +49,7 @@ INTEGRATION_SUMMARY_TOTAL_DEVICES_COUNT = f"{DOMAIN}_{{platform}}_platform_total
 INTEGRATION_SUMMARY_TOTAL_DEVICES_OFFLINE_COUNT = f"{DOMAIN}_{{platform}}_platform_total_devices_offline_count"
 
 ENTITY_TAG_PING_STATUS = "ping_status"
-ENTITY_TAG_PINGS_FAILED = "pings_failed_count"
+ENTITY_TAG_PINGS_FAILED_COUNT = "pings_failed_count"
 ENTITY_TAG_DISCONNECTED_SINCE = "disconnected_since"
 ENTITY_TAG_LAST_RESPONSE_TIME = "last_response_time"
 

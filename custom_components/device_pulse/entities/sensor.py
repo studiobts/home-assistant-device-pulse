@@ -3,7 +3,7 @@
 import logging
 
 from custom_components.device_pulse.const import (
-    ENTITY_TAG_PINGS_FAILED,
+    ENTITY_TAG_PINGS_FAILED_COUNT,
     ENTITY_TAG_DISCONNECTED_SINCE,
     ENTITY_TAG_LAST_RESPONSE_TIME,
 )
@@ -26,7 +26,7 @@ class DeviceFailedPingsSensor(BaseCoordinatorEntity, SensorEntity):
     @property
     def _tag(self) -> str:
         """TAG for the sensor type."""
-        return ENTITY_TAG_PINGS_FAILED
+        return ENTITY_TAG_PINGS_FAILED_COUNT
 
     @property
     def _name_suffix(self) -> str:
