@@ -13,6 +13,7 @@ from homeassistant.components.sensor import (
     SensorEntity,
     SensorStateClass,
 )
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.util.unit_conversion import UnitOfTime
 
 from .base import BaseCoordinatorEntity
@@ -37,6 +38,7 @@ class DeviceFailedPingsSensor(BaseCoordinatorEntity, SensorEntity):
         """Additional initialization for the sensor."""
         self._attr_icon = "mdi:alert-circle"
         self._attr_state_class = SensorStateClass.MEASUREMENT
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
     def native_value(self):
@@ -61,6 +63,7 @@ class DeviceDisconnectedSinceSensor(BaseCoordinatorEntity, SensorEntity):
         """Additional initialization for the sensor."""
         self._attr_icon = "mdi:clock-alert"
         self._attr_device_class = SensorDeviceClass.TIMESTAMP
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
     def native_value(self):
@@ -89,6 +92,7 @@ class DeviceLastResponseTimeSensor(BaseCoordinatorEntity, SensorEntity):
         """Additional initialization for the sensor."""
         self._attr_icon = "mdi:speedometer"
         self._attr_state_class = SensorStateClass.MEASUREMENT
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self._attr_native_unit_of_measurement = UnitOfTime.MILLISECONDS
 
     @property
