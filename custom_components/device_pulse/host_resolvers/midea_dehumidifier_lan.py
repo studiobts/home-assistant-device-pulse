@@ -7,7 +7,7 @@ from homeassistant.helpers import device_registry as dr
 
 _LOGGER = logging.getLogger(__name__)
 
-class MideaDehumidifierLanIPResolver(BaseHostResolver):
+class MideaDehumidifierLanResolver(BaseHostResolver):
     @staticmethod
     def resolve(config_entry: ConfigEntry, device: dr.DeviceEntry) -> str | None:
         for config_entry_device in config_entry.data.get("devices", []):
