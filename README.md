@@ -119,6 +119,26 @@ These events can be used in automations to trigger notifications, log changes, o
 
 ---
 
+## Configuration Parsing
+
+Not all integrations have a straightforward configuration structure where the host can be easily identified. 
+
+For integrations with complex or "non-standard" configuration formats, you can create a dedicated resolver class to handle proper configuration parsing.
+
+### Creating a Custom Resolver
+
+To implement a custom resolver:
+- Create a new file in the `host_resolvers` directory named with the integration's domain
+- **Extend BaseHostResolver**: Your class must inherit from the base resolver class
+- **Implement the `resolve` method**: Return the host for the specific device
+
+### Current Custom Resolvers
+
+At the moment, the following custom resolvers are implemented:
+
+- Midea Dehumidifier LAN
+- Tasmota
+
 ## Device Pulse Timeline Card
 
 <p float="left">
