@@ -44,8 +44,8 @@ Device Pulse is a custom Home Assistant integration that provides flexible monit
    You can then select one of these integrations to monitor its devices.
 
 <p float="left">
-  <img src="images/config_flow_mode.png" height="350" />
-  <img src="images/config_flow_integration.png" height="350" />
+  <img src="https://github.com/studiobts/home-assistant-device-pulse/blob/main/images/config_flow_mode.png?raw=true" height="350" />
+  <img src="https://github.com/studiobts/home-assistant-device-pulse/blob/main/images/config_flow_integration.png?raw=true" height="350" />
 </p>
 
    During setup, you can specify which devices to monitor:   
@@ -55,7 +55,7 @@ Device Pulse is a custom Home Assistant integration that provides flexible monit
    - **Only listed devices** – include only the specified devices.
 
 <p float="left">
-  <img src="images/config_flow_device_selection.png" height="350" />
+  <img src="https://github.com/studiobts/home-assistant-device-pulse/blob/main/images/config_flow_device_selection.png?raw=true" height="350" />
 </p>
 
 2. **Custom Group Monitoring**\
@@ -70,7 +70,7 @@ For both configuration modes, you can define:
 - The **interval time** between each ping request.
 
 <p float="left">
-  <img src="images/config_flow_ping_parameters.png" height="350" />
+  <img src="https://github.com/studiobts/home-assistant-device-pulse/blob/main/images/config_flow_ping_parameters.png?raw=true" height="350" />
 </p>
 
 ---
@@ -86,7 +86,7 @@ You can choose to create additional sensors for each monitored device to track:
 - The round-trip time of the most recent ping.
 
 <p float="left">
-  <img src="images/config_flow_optional_sensors.png" height="450" />
+  <img src="https://github.com/studiobts/home-assistant-device-pulse/blob/main/images/config_flow_optional_sensors.png?raw=true" height="450" />
 </p>
 
 ### Summary Sensors per Integration or Group
@@ -129,7 +129,7 @@ These events can be used in automations to trigger notifications, log changes, o
 ## Device Pulse Timeline Card
 
 <p float="left">
-  <img src="images/timeline_card_horizontal.png" width="100%" />
+  <img src="https://github.com/studiobts/home-assistant-device-pulse/blob/main/images/timeline_card_horizontal.png?raw=true" width="100%" />
 </p>
 
 A companion custom Lovelace card named `device-pulse-timeline-card` is available in the repository [https://github.com/studiobts/device-pulse-timeline-card](https://github.com/studiobts/device-pulse-timeline-card).
@@ -142,7 +142,7 @@ The card can be added to your dashboard as a standard custom card once installed
 ## Device Pulse Table Card
 
 <p float="left">
-  <img src="images/table_card.png" width="100%" />
+  <img src="https://github.com/studiobts/home-assistant-device-pulse/blob/main/images/table_card.png?raw=true" width="100%" />
 </p>
 
 A companion custom Lovelace card named `device-pulse-table-card` is available in the repository [https://github.com/studiobts/device-pulse-table-card](https://github.com/studiobts/device-pulse-table-card).
@@ -230,7 +230,7 @@ max: 5
 ## Example With Button Card
 
 <p float="left">
-  <img src="images/custom_button_card_example.png" />
+  <img src="https://github.com/studiobts/home-assistant-device-pulse/blob/main/images/custom_button_card_example.png?raw=true" />
 </p>
 
 ```yaml
