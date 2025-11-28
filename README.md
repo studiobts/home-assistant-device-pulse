@@ -1,5 +1,11 @@
 # Device Pulse
 
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
+
+If you want to make donation as appreciation of my work, you can do so via buy me a coffee. Thank you!
+
+<a href="https://buymeacoffee.com/studiobts" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png"></a>
+
 ## Introduction
 
 Device Pulse is a custom Home Assistant integration that provides flexible monitoring of IP-based devices. It offers two configuration modes to track network device availability through ping checks and automatically generates summary sensors for quick visibility of connection states.
