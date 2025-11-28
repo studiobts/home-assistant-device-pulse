@@ -1,12 +1,5 @@
 # Device Pulse
 
-## README in Progress
-
-This README file is currently a work in progress.  
-Some sections may be incomplete or subject to change. 
-
----
-
 ## Introduction
 
 Device Pulse is a custom Home Assistant integration that provides flexible monitoring of IP-based devices. It offers two configuration modes to track network device availability through ping checks and automatically generates summary sensors for quick visibility of connection states.
