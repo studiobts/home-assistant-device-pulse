@@ -5,9 +5,10 @@ from __future__ import annotations
 import logging
 
 from custom_components.device_pulse.const import (
+    ENTITY_ATTR_INTEGRATION_DOMAIN,
     ENTITY_TAG_PING_STATUS,
     INTEGRATION_SUMMARY_TOTAL_DEVICES_OFFLINE_COUNT,
-    NETWORK_SUMMARY_TOTAL_DEVICES_OFFLINE_COUNT, EVENT_DEVICE_WENT_OFFLINE,
+    NETWORK_SUMMARY_TOTAL_DEVICES_OFFLINE_COUNT
 )
 from custom_components.device_pulse.utils import is_tagged_entity_entry
 
@@ -72,7 +73,11 @@ class TotalDevicesDisconnectedCountSensor(SensorEntity, NetworkStatusEntity):
                 and not entity_entry.disabled
             ):
                 state = self.hass.states.get(entity_id)
-                if state and state.state == "off":
+                if (
+                    state
+                    and state.state == "off"
+                    and (not self.integration or self.integration.domain == state.attributes.get(ENTITY_ATTR_INTEGRATION_DOMAIN))
+                ):
                     devices_offline.append(entity_entry.device_id)
 
         self._went_offline_device_ids = list(set(devices_offline) - set(self._offline_device_ids))
