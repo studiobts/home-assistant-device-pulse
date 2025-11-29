@@ -12,6 +12,19 @@ Device Pulse is a custom Home Assistant integration that provides flexible monit
 
 ---
 
+## 💡 Integration Not Listed?
+
+**Is your integration missing from the available list during configuration?**
+
+Device Pulse can monitor most IP-based integrations, but some require custom configuration parsing.
+
+👉 **[Read how to request a custom host resolver](HOST_RESOLVER_REQUEST.md)**
+
+*Please note: Not all integrations can be supported, and implementation depends on the information provided and device availability for testing.*
+
+---
+
+
 ## Installation
 
 #### Method 1: HACS (Recommended)
@@ -144,6 +157,11 @@ At the moment, the following custom resolvers are implemented:
 
 - Midea Dehumidifier LAN
 - Tasmota
+
+## Requesting a New Host Resolver
+
+If you need support for an integration that is not currently listed, please refer to the instructions in the file [HOST_RESOLVER_REQUEST](HOST_RESOLVER_REQUEST.md).  
+It explains the required information and how to submit a request for a new custom host resolver.
 
 ## Device Pulse Timeline Card
 
