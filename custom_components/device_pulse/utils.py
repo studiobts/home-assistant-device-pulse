@@ -168,6 +168,10 @@ def is_device_valid_for_monitoring(
     integration: IntegrationData | None = None,
 ) -> bool:
     """Check if device is valid for monitoring."""
+    if not device.primary_config_entry:
+        _LOGGER.info("Device not valid: %s (no primary_config_entry)", device.name)
+        return False
+
     entry = hass.config_entries.async_get_entry(device.primary_config_entry)
     if not entry:
         _LOGGER.info(
@@ -188,10 +192,6 @@ def is_device_valid_for_monitoring(
             device.name,
             device.via_device_id,
         )
-        return False
-
-    if not device.primary_config_entry:
-        _LOGGER.info("Device not valid: %s (no primary_config_entry)", device.name)
         return False
 
     # Filter device by integration
