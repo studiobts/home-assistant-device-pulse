@@ -157,6 +157,7 @@ At the moment, the following custom resolvers are implemented:
 
 - Midea Dehumidifier LAN
 - Tasmota
+- LocalTuya
 
 ## Requesting a New Host Resolver
 
