@@ -5,7 +5,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        **Note:** that this place is only for reporting issues with the integration, not for the cards.
+        **Note:** If your issue relates to a specific device integration (e.g., Shelly, Zigbee), please add the integration name in square brackets at the start of the title, like this: `[Shelly] Your issue title here`.
+        **Note:** This place is only for reporting issues with the integration, not for the cards.
   - type: checkboxes
     id: check_existing
     attributes:
