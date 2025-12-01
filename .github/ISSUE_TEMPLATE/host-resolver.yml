@@ -1,0 +1,66 @@
+name: Integration host resolver request
+description: Request support for a new integration that needs a custom host resolver
+labels: host-resolver
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Note:** This form is for requesting host resolver support for integrations only. For issues related to Device Pulse cards, please use a different issue type.
+  - type: checkboxes
+    id: check_existing
+    attributes:
+      label: Checklist
+      description: Please confirm the following before submitting your request.
+      options:
+        - label: I have searched for similar existing requests (both open and closed) and have not found a duplicate.
+          required: true
+        - label: I am willing to participate in discussions about this request and help with testing if needed.
+          required: true
+  - type: input
+    id: integration-version
+    attributes:
+      label: Device Pulse version
+      description: "Which version of the Device Pulse integration are you currently using?"
+      placeholder: "v1.0.0"
+    validations:
+      required: true
+  - type: input
+    id: hass-version
+    attributes:
+      label: Home Assistant version
+      description: "Which version of Home Assistant are you currently using?"
+      placeholder: "2025.11.0"
+    validations:
+      required: true
+  - type: input
+    id: integration-name
+    attributes:
+      label: Integration name
+      description: "Specify the name of the integration that needs host resolver support."
+      placeholder: "Shelly"
+    validations:
+      required: true
+  - type: textarea
+    id: config-entry
+    attributes:
+      label: Config entry
+      description: "Paste the configuration entry for this integration from the `/config/.storage/core.config_entries` file."
+    validations:
+      required: true
+  - type: textarea
+    id: device-entries
+    attributes:
+      label: Device entries
+      description: "Paste one or more device entries associated with the configuration entry above from the `/config/.storage/core.device_registry` file."
+    validations:
+      required: true
+  - type: textarea
+    id: connected-via-device-entry
+    attributes:
+      label: "Connected via - device entry"
+      description: "If the device entry above contains a 'connected_via' field linking to another device, paste that parent device entry here."
+  - type: textarea
+    id: connected-via-config-entry
+    attributes:
+      label: "Connected via - config entry"
+      description: "If the device entry above contains a 'connected_via' field linking to another device, paste the configuration entry for that parent device here."

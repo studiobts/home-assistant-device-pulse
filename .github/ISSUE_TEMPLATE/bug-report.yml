@@ -1,0 +1,58 @@
+name: Bug report
+description: Create a report to help improve Device Pulse integration
+labels: bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Note:** that this place is only for reporting issues with the integration, not for the cards.
+  - type: checkboxes
+    id: check_existing
+    attributes:
+      label: Checklist
+      description: Please check the following items before submitting your request.
+      options:
+        - label: I checked for similar existing issues (both open and closed) before posting.
+          required: true
+        - label: I will participate in further discussion about this issue and can help by testing (if requested).
+          required: true
+  - type: input
+    id: integration-version
+    attributes:
+      label: Integration Version
+      description: "Which version of Device Pulse are you running?"
+      placeholder: "v1.0.0"
+    validations:
+      required: true
+  - type: input
+    id: hass-version
+    attributes:
+      label: Home Assistant Version
+      description: "Which version of Home Assistant are you running?"
+      placeholder: "2025.11.0"
+    validations:
+      required: true
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Bug description
+      description: What happened and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Which steps did you take to see this bug (if any)?
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional info
+      description: Add additional info which you see relevant here (optional).
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: "If applicable, add relevant log output here. Make sure to enable debug logging for 'custom_components.device_pulse' in your logger settings or enable it through the frontend."

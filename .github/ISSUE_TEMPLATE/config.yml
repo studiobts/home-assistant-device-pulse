@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Bugs/Features for Device Pulse Table Card
+    url: https://github.com/studiobts/device-pulse-table-card/issues
+    about: Report problems or propose new features for the table card
+  - name: Bugs/Features for Device Pulse Timeline Card
+    url: https://github.com/studiobts/device-pulse-timeline-card/issues
+    about: Report problems or propose new features for the timeline card
