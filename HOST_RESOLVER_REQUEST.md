@@ -36,6 +36,20 @@ This file contains information about all devices registered in Home Assistant. Y
 - Copy the relevant device entries that belong to your integration
 - These entries will show how the integration exposes device parameters like `identifiers`, `connections`, and configuration data
 
+### 3. Devices with `via_device_id` Attribute
+
+**Important**: If any device entry contains a `via_device_id` attribute, you must also include:
+
+- The complete device registry entry of the device referenced by `via_device_id`
+- The config entry data (from `/config/.storage/core.config_entries`) associated with that referenced device
+
+**Example**: If device A has `"via_device_id": "device_b_id"`, you need to provide:
+- Device A's registry entry
+- Device B's registry entry (the one referenced by `via_device_id`)
+- Device B's config entry data
+
+This information is crucial for understanding the device hierarchy and relationships within the integration.
+
 ## Security Precautions
 
 ⚠️ **Before copying any data, carefully review and remove all sensitive information**, including:
@@ -61,27 +75,9 @@ This file contains information about all devices registered in Home Assistant. Y
 
 Once you have gathered the required information:
 
-1. Create a new GitHub issue in the repository
-2. Use the title format: `[Host Resolver Request] Integration Name`
-3. Include the sanitized config entry and device registry data
-4. Specify which devices from the integration you want monitored
-5. Provide any additional context about the integration's behavior
-
-## Example Request Format
-
-```
-Integration Name: [Integration Domain Name]
-
-Config Entry:
-
-{ "entry_id": "xxx", "domain": "my_integration", "data": { "host": "192.168.1.100", ... }, ... }
-
-Device Registry Entry (one or more entries):
-
-{ "id": "device_id_1", "identifiers": [["my_integration", "unique_device_id"]], "config_entries": ["xxx"], ...}
-{ "id": "device_id_2", "identifiers": [["my_integration", "unique_device_id"]], "config_entries": ["xxx"], ...}
-
-```
+1. Create a new GitHub issue in the repository using the template provided
+2. Include the sanitized config entry and device registry data
+3. Provide any additional context about the integration's behavior
 
 ## What Happens Next
 
