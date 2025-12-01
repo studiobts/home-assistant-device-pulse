@@ -1,4 +1,4 @@
-name: Integration host resolver request
+name: Integration Host Resolver Request
 description: Request support for a new integration that needs a custom host resolver
 labels: host-resolver
 body:
