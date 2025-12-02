@@ -41,19 +41,19 @@ body:
     validations:
       required: true
   - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: "Add relevant log output here. Make sure to enable debug logging through the frontend."
+    validations:
+      required: true
+  - type: textarea
     id: steps
     attributes:
       label: Steps to reproduce
       description: Which steps did you take to see this bug (if any)?
-    validations:
-      required: true
   - type: textarea
     id: extra
     attributes:
       label: Additional info
       description: Add additional info which you see relevant here (optional).
-  - type: textarea
-    id: logs
-    attributes:
-      label: Relevant log output
-      description: "If applicable, add relevant log output here. Make sure to enable debug logging for 'custom_components.device_pulse' in your logger settings or enable it through the frontend."
