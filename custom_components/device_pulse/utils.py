@@ -187,7 +187,7 @@ def is_device_valid_for_monitoring(
 
     # Exclude devices connected through another device
     if device.via_device_id:
-        _LOGGER.info(
+        _LOGGER.debug(
             "Device not valid: %s (connected via_device_id: %s)",
             device.name,
             device.via_device_id,
