@@ -7,6 +7,7 @@ import logging
 from typing import Any
 
 from homeassistant.components.ping import PingDataICMPLib, PingDataSubProcess, _can_use_icmp_lib_with_privilege
+from homeassistant.components import zeroconf
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import Event, HomeAssistant
 from homeassistant.helpers import config_validation as cv
@@ -135,6 +136,7 @@ async def async_setup_entry(
         await _ensure_network_summary_entry_exists(hass)
 
         device_registry = dr.async_get(hass)
+        zc = await zeroconf.async_get_instance(hass)
 
         if entry_type == ENTRY_TYPE_INTEGRATION:
             # Get integration domain to monitor
@@ -197,7 +199,7 @@ async def async_setup_entry(
 
         for device in devices:
             # Extract host for the device
-            host = await utils.extract_device_host(hass, device)
+            host = await utils.extract_device_host(hass, device, zc)
 
             if host:
                 if device.disabled:

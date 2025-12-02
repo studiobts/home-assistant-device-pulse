@@ -3,8 +3,10 @@ from dataclasses import dataclass
 import ipaddress
 import logging
 import re
+from zeroconf.asyncio import AsyncServiceInfo
 
-from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import ConfigEntry, SOURCE_ZEROCONF
+from homeassistant.components import zeroconf
 from homeassistant.core import HomeAssistant
 from homeassistant.loader import async_get_integration
 from homeassistant.helpers import device_registry as dr, entity_registry as er
@@ -35,6 +37,7 @@ class IntegrationData:
 async def get_valid_integrations_for_monitoring(hass: HomeAssistant) -> dict[str, IntegrationData]:
     """Find all integrations that have devices with a hostname or IP address in the configuration."""
     device_registry = dr.async_get(hass)
+    zc = await zeroconf.async_get_instance(hass)
     integrations: dict[str, IntegrationData] = {}
 
     all_devices = list(device_registry.devices.values())
@@ -51,20 +54,37 @@ async def get_valid_integrations_for_monitoring(hass: HomeAssistant) -> dict[str
         if not is_device_valid_for_monitoring(hass, device):
             continue
         # Get the primary config entry for the device
-        config_entry = hass.config_entries.async_get_entry(device.primary_config_entry)
+        device_config_entry = hass.config_entries.async_get_entry(device.primary_config_entry)
         # Check if the configuration contains a valid Host parameter
-        has_host = await extract_device_host(hass, device, config_entry) is not None
+        has_host = await extract_device_host(hass, device, zc, device_config_entry) is not None
 
-        if has_host and config_entry.domain not in integrations:
+        if has_host and device_config_entry.domain not in integrations:
             # Get the friendly name of the integration
-            friendly_name = await _get_integration_name(config_entry.domain)
-            integrations[config_entry.domain] = IntegrationData(config_entry.domain, friendly_name, 0, False)
+            friendly_name = await _get_integration_name(device_config_entry.domain)
+            integrations[device_config_entry.domain] = IntegrationData(device_config_entry.domain, friendly_name, 0, False)
 
         if has_host:
             # Increment the device count for the integration
-            integrations[config_entry.domain].device_count += 1
+            integrations[device_config_entry.domain].device_count += 1
 
     return integrations
+
+async def _async_get_host_from_zeroconf(zc: zeroconf.models.HaZeroconf, config_entry: ConfigEntry) -> str | None:
+    try:
+        service_type = config_entry.discovery_keys["zeroconf"][0].key[0]
+        service_name = config_entry.discovery_keys["zeroconf"][0].key[1]
+    except Exception:
+        _LOGGER.warning("Unable to get zeroconf discovery info for [%s][%s]: %s", config_entry.domain, config_entry.title, config_entry.discovery_keys)
+        return None
+
+    service_info = AsyncServiceInfo(service_type, service_name)
+
+    if await service_info.async_request(zc, timeout=1500):
+        for address in service_info.addresses:
+            if len(address) == 4:
+                return str(ipaddress.IPv4Address(address))
+
+    return None
 
 async def get_device_entities(
     hass: HomeAssistant,
@@ -234,35 +254,40 @@ def is_valid_hostname_or_ip(value) -> bool:
     return False
 
 async def extract_device_host(
-    hass: HomeAssistant, device: dr.DeviceEntry, config_entry: ConfigEntry | None = None
+    hass: HomeAssistant, device: dr.DeviceEntry, zc: zeroconf.models.HaZeroconf, device_config_entry: ConfigEntry | None = None
 ) -> str | None:
     """Extract Host for device based on integration type."""
     # Get the primary config entry for the device
-    config_entry = config_entry or hass.config_entries.async_get_entry(
+    device_config_entry = device_config_entry or hass.config_entries.async_get_entry(
         device.primary_config_entry
     )
 
     host = None
 
-    if config_entry.data.get(CONF_ENTRY_TYPE) == ENTRY_TYPE_CUSTOM_GROUP:
-        group_devices = config_entry.options.get(CONF_GROUP_DEVICES_LIST)
+    if device_config_entry.data.get(CONF_ENTRY_TYPE) == ENTRY_TYPE_CUSTOM_GROUP:
+        group_devices = device_config_entry.options.get(CONF_GROUP_DEVICES_LIST)
         for group_device in group_devices:
             if next(iter(device.identifiers))[1] == group_device.get(CONF_GROUP_DEVICE_ID):
                 host = group_device.get(CONF_GROUP_DEVICE_HOST)
                 break
     # Check if there is a Host Resolver for the integration
-    elif host := await resolve_host(config_entry, device):
+    elif host := await resolve_host(device_config_entry, device):
         _LOGGER.debug("Found Host '%s' with host resolver for device %s", host, device.name)
     else:
         for param_name in HOST_PARAM_NAMES:
-            if param_name in config_entry.data:
-                host = config_entry.data[param_name]
+            if param_name in device_config_entry.data:
+                host = device_config_entry.data[param_name]
                 _LOGGER.debug("Found Host '%s' in data parameter '%s' for device %s",host, param_name, device.name)
                 break
-            if param_name in config_entry.options:
-                host = config_entry.options[param_name]
+            if param_name in device_config_entry.options:
+                host = device_config_entry.options[param_name]
                 _LOGGER.debug("Found Host '%s' in options parameter '%s' for device %s",host, param_name, device.name)
                 break
+
+    # Last chance, check if device was added through zeroconf and query it
+    if not host and device_config_entry.source == SOURCE_ZEROCONF:
+        if host := await _async_get_host_from_zeroconf(zc, device_config_entry):
+            _LOGGER.debug("Found Host '%s' from zeroconf for device %s", host, device.name)
 
     # Validate the host value
     return host if host and is_valid_hostname_or_ip(host) else None
