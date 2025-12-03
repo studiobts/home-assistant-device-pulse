@@ -51,7 +51,7 @@ async def get_valid_integrations_for_monitoring(hass: HomeAssistant) -> dict[str
             return integration.name
 
     for device in all_devices:
-        if not is_device_valid_for_monitoring(hass, device):
+        if not is_device_valid_for_monitoring(hass, device_registry, device):
             continue
         # Get the primary config entry for the device
         device_config_entry = hass.config_entries.async_get_entry(device.primary_config_entry)
@@ -178,25 +178,28 @@ async def get_integration_devices_valid(hass: HomeAssistant, integration: Integr
     return [
         device
         for device in device_registry.devices.values()
-        if is_device_valid_for_monitoring(hass, device, integration)
+        if is_device_valid_for_monitoring(hass, device_registry, device, integration)
     ]
 
 
 def is_device_valid_for_monitoring(
     hass: HomeAssistant,
+    device_registry: dr.DeviceRegistry,
     device: dr.DeviceEntry,
     integration: IntegrationData | None = None,
 ) -> bool:
+    device_name = device.name_by_user or device.name
+
     """Check if device is valid for monitoring."""
     if not device.primary_config_entry:
-        _LOGGER.info("Device not valid: %s (no primary_config_entry)", device.name)
+        _LOGGER.info("Device not valid: %s (no primary_config_entry)", device_name)
         return False
 
     entry = hass.config_entries.async_get_entry(device.primary_config_entry)
     if not entry:
         _LOGGER.info(
             "Device not valid: %s (primary_config_entry %s not found)",
-            device.name,
+            device_name,
             device.primary_config_entry,
         )
         return False
@@ -207,18 +210,27 @@ def is_device_valid_for_monitoring(
 
     # Exclude devices connected through another device
     if device.via_device_id:
-        _LOGGER.debug(
-            "Device not valid: %s (connected via_device_id: %s)",
-            device.name,
-            device.via_device_id,
-        )
-        return False
+        # If the parent device's primary config entry is different from the current device's,
+        # the current device is considered valid. This ensures that devices managed by different
+        # config entries are not excluded, even if they are linked as parent/child.
+        # For example, the Fritz!Box integration performs internal matching to associate devices
+        # (e.g., a Tasmota device connected via Wi-Fi to the router) as children of its own devices.
+        # This logic prevents such associations from invalidating the current device.
+        connected_device = device_registry.async_get(device.via_device_id)
+        if connected_device and connected_device.primary_config_entry == device.primary_config_entry:
+            _LOGGER.debug(
+                "Device not valid: %s (connected via_device_id: %s, %s)",
+                device_name,
+                device.via_device_id,
+                connected_device.name_by_user or connected_device.name,
+            )
+            return False
 
     # Filter device by integration
     if integration and entry.domain != integration.domain:
         _LOGGER.debug(
             "Device not valid: %s (config entry domain %s does not match %s)",
-            device.name,
+            device_name,
             entry.domain,
             integration.domain,
         )
