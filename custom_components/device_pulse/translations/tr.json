@@ -1,0 +1,270 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Device Pulse Kurulumu",
+                "description": "**İzlemeyi nasıl kurmak istersiniz?** \n\n- **Mevcut Entegrasyonu Kullan**: Önceden yapılandırdığınız bir entegrasyondaki cihazları izleyin.\n- **Manuel Grup Oluştur**: Yeni bir grup oluşturun ve cihazları manuel olarak ekleyin.",
+                "data": {
+                    "entry_type": "Yapılandırma Modu"
+                }
+            },
+            "integration_choice": {
+                "title": "Entegrasyon Seçin",
+                "description": "**İzlemek istediğiniz entegrasyonu seçin.** Yalnızca geçerli cihaz bilgisine sahip entegrasyonlar listelenecektir.",
+                "data": {
+                    "integration": "Entegrasyon"
+                },
+                "data_description": {
+                    "integration": "Geçerli cihazlara sahip **{integration_count}** entegrasyon bulundu."
+                }
+            },
+            "integration_device_selection_mode": {
+                "title": "Cihaz Seçim Modu",
+                "description": "**{integration_name}** entegrasyonundan hangi cihazların izleneceğini seçin.",
+                "data": {
+                    "device_selection_mode": "İzlenecek Cihazlar"
+                }
+            },
+            "integration_select_excluded_devices": {
+                "title": "Cihaz Seçimi",
+                "description": "**{integration_name}** entegrasyonu için **izlemek istemediğiniz cihazları seçin**. Diğer tüm geçerli cihazlar otomatik olarak dahil edilecektir.",
+                "data": {
+                    "devices": "Cihazlar"
+                }
+            },
+            "integration_select_included_devices": {
+                "title": "Cihaz Seçimi",
+                "description": "**{integration_name}** entegrasyonu için **izlemek istediğiniz cihazları seçin**. Yalnızca bu cihazlar dahil edilecektir.",
+                "data": {
+                    "devices": "Cihazlar"
+                }
+            },
+            "integration_summary": {
+                "title": "Yapılandırma Özeti",
+                "description": "**Entegrasyon:** {integration_name}\n**Cihazlar:** {device_summary}\n**Ping Ayarları:**\n- Çevrimdışı Öncesi Başarısız Ping: {ping_attempts_before_failure}\n- Ping Aralığı: {ping_interval} saniye\n\n**Sensörler:** {sensors}\n\n**Çevrimdışı Algılama Süresi:** yaklaşık {detection_time}\n\nYapılandırmayı tamamlamak için Gönder'e basın."
+            },
+            "custom_group_info": {
+                "title": "Cihaz Grubu Oluştur",
+                "description": "Yeni cihaz grubu için bir ad girin. Sonraki adımda bu gruba cihaz ekleyebileceksiniz.",
+                "data": {
+                    "group_name": "Grup Adı"
+                },
+                "data_description": {
+                    "group_name": "Bu izleme grubunu tanımlayacak ad."
+                }
+            },
+            "custom_group_add_device": {
+                "title": "Gruba Cihaz Ekle",
+                "description": "Adını ve sunucusunu belirterek bu gruba yeni bir cihaz ekleyin. Sunucu geçerli bir ana bilgisayar adı veya IP adresi olmalıdır.",
+                "data": {
+                    "group_device_name": "Cihaz Adı",
+                    "group_device_host": "Sunucu"
+                },
+                "data_description": {
+                    "group_device_name": "Cihazı tanımlamak için kullanılacak kolay ad.",
+                    "group_device_host": "İzlenecek cihazın ana bilgisayar adı veya IP adresi."
+                }
+            },
+            "custom_group_add_device_or_continue": {
+                "title": "Yeni Cihaz Ekle veya Devam Et",
+                "description": "Başka bir cihaz eklemek mi yoksa sonraki adımlara devam etmek mi istediğinizi seçin.",
+                "data": {
+                    "group_add_device_or_continue": "İşlem"
+                }
+            },
+            "custom_group_summary": {
+                "title": "Grup Özeti",
+                "description": "**Grup:** {group_name}\n**Cihazlar:**\n{group_devices_list}\n\n**Ping Ayarları:**\n- Çevrimdışı Öncesi Başarısız Ping: {ping_attempts_before_failure}\n- Ping Aralığı: {ping_interval} saniye\n\n**Sensörler:** {sensors}\n\n**Çevrimdışı Algılama Süresi:** yaklaşık {detection_time}\n\nYapılandırmayı tamamlamak için Gönder'e basın."
+            },
+            "monitor_parameters": {
+                "title": "Ping Parametreleri",
+                "description": "**Cihazların ping ile nasıl izleneceğine dair kuralları belirleyin.** Bir cihazın çevrimdışı kabul edilmeden önce kaç başarısız ping gerektiğini ve her cihazın ne sıklıkta pingleneceğini tanımlayın.",
+                "data": {
+                    "ping_attempts_before_failure": "Çevrimdışı Öncesi Başarısız Ping",
+                    "ping_interval": "Ping Aralığı"
+                },
+                "data_description": {
+                    "ping_attempts_before_failure": "Cihaz çevrimdışı kabul edilmeden önceki ardışık başarısız ping sayısı",
+                    "ping_interval": "Ping kontrolleri arasındaki süre"
+                }
+            },
+            "monitor_sensors": {
+                "title": "Opsiyonel Sensör Yapılandırması",
+                "description": "Daha ayrıntılı izleme bilgisi almak için ek sensörleri etkinleştirebilirsiniz. Hangi opsiyonel sensörleri oluşturmak istediğinizi seçin.",
+                "data": {
+                    "sensors_integration_summary_enabled": "Özet Sensörler",
+                    "sensors_failed_pings_enabled": "Başarısız Ping Sayacı Sensörü",
+                    "sensors_disconnected_since_enabled": "Bağlantı Kesilme Zamanı Sensörü",
+                    "sensors_last_response_time_enabled": "Son Ping Yanıt Süresi Sensörü"
+                },
+                "data_description": {
+                    "sensors_integration_summary_enabled": "{subject} grubu için izlenen cihaz sayısını ve çevrimdışı cihaz sayısını gösteren özet sensörler oluştur",
+                    "sensors_failed_pings_enabled": "Her cihaz için ardışık başarısız ping sayısını gösteren bir sensör oluştur.",
+                    "sensors_disconnected_since_enabled": "Bir cihazın ne zaman çevrimdışı olduğunu kaydeden bir sensör oluştur.",
+                    "sensors_last_response_time_enabled": "Son başarılı pingin yanıt süresini gösteren bir sensör oluştur."
+                }
+            }
+        },
+        "error": {
+            "no_integrations_selected": "Lütfen en az bir entegrasyon seçin",
+            "select_at_least_one_device": "Lütfen en az bir cihaz seçin",
+            "invalid_hostname_or_ip": "Sunucu alanı geçerli bir Ana Bilgisayar Adı veya IP Adresi değil",
+            "unknown": "Bilinmeyen bir hata oluştu"
+        },
+        "abort": {
+            "already_configured": "Bu entegrasyon zaten yapılandırılmış",
+            "no_supported_integrations": "Geçerli cihazlara sahip entegrasyon bulunamadı",
+            "all_integrations_configured": "Tüm mevcut entegrasyonlar zaten yapılandırılmış",
+            "selected_integration_not_found": "Seçilen entegrasyon bulunamadı",
+            "no_config_flow_available": "Yapılandırma girişi için yapılandırma akışı mevcut değil",
+            "unknown_config_entry_type": "Bilinmeyen yapılandırma girişi türü"
+        }
+    },
+    "options": {
+        "step": {
+            "integration_device_selection_mode": {
+                "title": "Cihaz Seçim Modu",
+                "description": "**{integration_name}** entegrasyonundan hangi cihazların izleneceğini seçin.",
+                "data": {
+                    "device_selection_mode": "İzlenecek Cihazlar"
+                }
+            },
+            "integration_select_excluded_devices": {
+                "title": "Cihaz Seçimi",
+                "description": "**{integration_name}** entegrasyonu için **izlemek istemediğiniz cihazları seçin**. Diğer tüm geçerli cihazlar otomatik olarak dahil edilecektir.",
+                "data": {
+                    "devices": "Cihazlar"
+                }
+            },
+            "integration_select_included_devices": {
+                "title": "Cihaz Seçimi",
+                "description": "**{integration_name}** entegrasyonu için **izlemek istediğiniz cihazları seçin**. Yalnızca bu cihazlar dahil edilecektir.",
+                "data": {
+                    "devices": "Cihazlar"
+                }
+            },
+            "integration_summary": {
+                "title": "Yapılandırma Özeti",
+                "description": "**Entegrasyon:** {integration_name}\n**Cihazlar:** {device_summary}\n**Ping Ayarları:**\n- Çevrimdışı Öncesi Başarısız Ping: {ping_attempts_before_failure}\n- Ping Aralığı: {ping_interval} saniye\n\n**Sensörler:** {sensors}\n\n**Çevrimdışı Algılama Süresi:** yaklaşık {detection_time}\n\nYapılandırmayı tamamlamak için Gönder'e basın."
+            },
+            "custom_group_edit_action": {
+                "title": "Cihaz Grubunu Düzenle",
+                "description": "Bu grupta neyi değiştirmek istediğinizi seçin. Cihazları yönetebilir veya izleme ayarlarını düzeltebilirsiniz.",
+                "data": {
+                    "group_edit_action": "İşlem"
+                }
+            },
+            "custom_group_add_device": {
+                "title": "Gruba Cihaz Ekle",
+                "description": "Adını ve sunucusunu belirterek bu gruba yeni bir cihaz ekleyin. Sunucu geçerli bir ana bilgisayar adı veya IP adresi olmalıdır.",
+                "data": {
+                    "group_device_name": "Cihaz Adı",
+                    "group_device_host": "Sunucu"
+                },
+                "data_description": {
+                    "group_device_name": "Cihazı tanımlamak için kullanılacak kolay ad.",
+                    "group_device_host": "İzlenecek cihazın ana bilgisayar adı veya IP adresi."
+                }
+            },
+            "custom_group_remove_devices": {
+                "title": "Cihazları Kaldır",
+                "description": "Bu gruptan kaldırmak istediğiniz cihazları seçin. Onaylandıktan sonra cihaz artık izlenmeyecektir.",
+                "data": {
+                    "devices": "Kaldırılacak Cihazlar"
+                }
+            },
+            "custom_group_update_device_selection": {
+                "title": "Düzenlenecek Cihazı Seç",
+                "description": "Düzenlemek istediğiniz cihazı seçin. Sonraki adımda parametrelerini güncelleyebileceksiniz.",
+                "data": {
+                    "device": "Düzenlenecek Cihaz"
+                }
+            },
+            "custom_group_update_device_data": {
+                "title": "Cihaz Parametrelerini Düzenle",
+                "description": "**{device_name}** cihazının ayrıntılarını güncelleyin. İzleme için kullanılan ayarları değiştirebilirsiniz.",
+                "data": {
+                    "group_device_host": "Sunucu"
+                },
+                "data_description": {
+                    "group_device_host": "İzlenecek cihazın ana bilgisayar adı veya IP adresi."
+                }
+            },
+            "custom_group_summary": {
+                "title": "Grup Özeti",
+                "description": "**Grup:** {group_name}\n**Cihazlar:**\n{group_devices_list}\n\n**Ping Ayarları:**\n- Çevrimdışı Öncesi Başarısız Ping: {ping_attempts_before_failure}\n- Ping Aralığı: {ping_interval} saniye\n\n**Sensörler:** {sensors}\n\n**Çevrimdışı Algılama Süresi:** yaklaşık {detection_time}\n\nYapılandırmayı tamamlamak için Gönder'e basın."
+            },
+            "monitor_parameters": {
+                "title": "Ping Parametreleri",
+                "description": "**Cihazların ping ile nasıl izleneceğine dair kuralları belirleyin.** Bir cihazın çevrimdışı kabul edilmeden önce kaç başarısız ping gerektiğini ve her cihazın ne sıklıkta pingleneceğini tanımlayın.",
+                "data": {
+                    "ping_attempts_before_failure": "Çevrimdışı Öncesi Başarısız Ping",
+                    "ping_interval": "Ping Aralığı"
+                },
+                "data_description": {
+                    "ping_attempts_before_failure": "Cihaz çevrimdışı kabul edilmeden önceki ardışık başarısız ping sayısı",
+                    "ping_interval": "Ping kontrolleri arasındaki süre"
+                }
+            },
+            "monitor_sensors": {
+                "title": "Opsiyonel Sensör Yapılandırması",
+                "description": "Daha ayrıntılı izleme bilgisi almak için ek sensörleri etkinleştirebilirsiniz. Hangi opsiyonel sensörleri oluşturmak istediğinizi seçin.",
+                "data": {
+                    "sensors_integration_summary_enabled": "Özet Sensörler",
+                    "sensors_failed_pings_enabled": "Başarısız Ping Sayacı Sensörü",
+                    "sensors_disconnected_since_enabled": "Bağlantı Kesilme Zamanı Sensörü",
+                    "sensors_last_response_time_enabled": "Son Ping Yanıt Süresi Sensörü"
+                },
+                "data_description": {
+                    "sensors_integration_summary_enabled": "{subject} grubu için izlenen cihaz sayısını ve çevrimdışı cihaz sayısını gösteren özet sensörler oluştur",
+                    "sensors_failed_pings_enabled": "Her cihaz için ardışık başarısız ping sayısını gösteren bir sensör oluştur.",
+                    "sensors_disconnected_since_enabled": "Bir cihazın ne zaman çevrimdışı olduğunu kaydeden bir sensör oluştur.",
+                    "sensors_last_response_time_enabled": "Son başarılı pingin yanıt süresini gösteren bir sensör oluştur."
+                }
+            }
+        },
+        "error": {
+            "select_at_least_one_device": "Lütfen en az bir cihaz seçin",
+            "invalid_hostname_or_ip": "Sunucu alanı geçerli bir Ana Bilgisayar Adı veya IP Adresi değil",
+            "unknown": "Bilinmeyen bir hata oluştu"
+        },
+        "abort": {
+            "no_options_flow_available": "Yapılandırma girişi için seçenek akışı mevcut değil",
+            "unknown_config_entry_type": "Bilinmeyen yapılandırma girişi türü"
+        }
+    },
+    "selector": {
+        "device_selection_mode": {
+            "options": {
+                "all": "Tüm Cihazlar – Geçerli sunucuya sahip her cihazı izle",
+                "exclude": "Bazı Cihazları Hariç Tut – Sonraki adımda seçtikleriniz dışındaki tüm cihazları izle",
+                "include": "Yalnızca Seçilen Cihazlar – Yalnızca sonraki adımda seçtiğiniz cihazları izle"
+            }
+        },
+        "entry_type": {
+            "options": {
+                "custom_group": "Manuel Grup Oluştur",
+                "integration": "Mevcut Entegrasyonu Kullan"
+            }
+        },
+        "group_edit_action": {
+            "options": {
+                "group_edit_add_device": "Yeni Cihaz Ekle",
+                "group_edit_remove_devices": "Cihazları Kaldır",
+                "group_edit_update_device": "Mevcut Cihazı Güncelle",
+                "group_edit_change_settings": "Grup Ayarlarını Değiştir (Ping ve Opsiyonel Sensörler)"
+            }
+        },
+        "group_add_device_or_continue": {
+            "options": {
+              "continue": "Sonraki Adımlara Devam Et",
+              "add_device": "Başka Bir Cihaz Ekle"
+            }
+        },
+        "ping_attempts_before_failure": {
+            "unit_of_measurement": {
+                "seconds": "saniye"
+            }
+        }
+    }
+}
