@@ -192,7 +192,7 @@
             },
             "custom_group_summary": {
                 "title": "Grup Özeti",
-                "description": "**Grup:** {group_name}\n**Cihazlar:**\n{group_devices_list}\n\n**Ping Ayarları:**\n- Çevrimdışı Öncesi Başarısız Ping: {ping_attempts_before_failure}\n- Ping Aralığı: {ping_interval} saniye\n\n**Sensörler:** {sensors}\n\n**Çevrimdışı Algılama Süresi:** yaklaşık {detection_time}\n\nYapılandırmayı tamamlamak için Gönder'e basın."
+                "description": "**Grup:** {group_name}\n**Cihazlar:**\n{group_devices_list}\n\n**Ping Ayarları:**\n- Çevrimdışı Öncesi Başarısız Ping: {ping_attempts_before_failure}\n- Ping Aralığı: {ping_interval} saniye\n\n**Sensörler:** {sensors}\n\n⏱️ **Çevrimdışı Algılama Süresi:** yaklaşık {detection_time}\n\nYapılandırmayı tamamlamak için Gönder'e basın."
             },
             "monitor_parameters": {
                 "title": "Ping Parametreleri",
