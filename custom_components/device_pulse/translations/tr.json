@@ -145,7 +145,7 @@
             },
             "integration_summary": {
                 "title": "Yapılandırma Özeti",
-                "description": "**Entegrasyon:** {integration_name}\n**Cihazlar:** {device_summary}\n**Ping Ayarları:**\n- Çevrimdışı Öncesi Başarısız Ping: {ping_attempts_before_failure}\n- Ping Aralığı: {ping_interval} saniye\n\n**Sensörler:** {sensors}\n\n**Çevrimdışı Algılama Süresi:** yaklaşık {detection_time}\n\nYapılandırmayı tamamlamak için Gönder'e basın."
+                "description": "**Entegrasyon:** {integration_name}\n**Cihazlar:** {device_summary}\n**Ping Ayarları:**\n- Çevrimdışı Öncesi Başarısız Ping: {ping_attempts_before_failure}\n- Ping Aralığı: {ping_interval} saniye\n\n**Sensörler:** {sensors}\n\n⏱️ **Çevrimdışı Algılama Süresi:** yaklaşık {detection_time}\n\nYapılandırmayı tamamlamak için Gönder'e basın."
             },
             "custom_group_edit_action": {
                 "title": "Cihaz Grubunu Düzenle",
