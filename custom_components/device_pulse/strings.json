@@ -41,7 +41,7 @@
             },
             "integration_summary": {
                 "title": "Configuration Summary",
-                "description": "**Integration:** {integration_name}\n**Devices:** {device_summary}\n**Ping Settings:**\n- Failed Pings Before Offline: {ping_attempts_before_failure}\n- Ping Interval: {ping_interval} seconds\n\n**Sensors:** {sensors}\n\n⏱️ **Offline Detection Time:** about {detection_time}\n\nPress Submit to complete the configuration."
+                "description": "**Integration:** {integration_name}\n**Devices:** {device_summary}\n**Ping Settings:**\n- Method: {ping_method}\n- Failed Pings Before Offline: {ping_attempts_before_failure}\n- Ping Interval: {ping_interval} seconds\n\n**Sensors:** {sensors}\n\n⏱️ **Offline Detection Time:** about {detection_time}\n\nPress Submit to complete the configuration."
             },
             "custom_group_info": {
                 "title": "Create Devices Group",
@@ -74,7 +74,7 @@
             },
             "custom_group_summary": {
                 "title": "Group Summary",
-                "description": "**Group:** {group_name}\n**Devices:**\n{group_devices_list}\n\n**Ping Settings:**\n- Failed Pings Before Offline: {ping_attempts_before_failure}\n- Ping Interval: {ping_interval} seconds\n\n**Sensors:** {sensors}\n\n⏱️ **Offline Detection Time:** about {detection_time}\n\nPress Submit to complete the configuration."
+                "description": "**Group:** {group_name}\n**Devices:**\n{group_devices_list}\n\n**Ping Settings:**\n- Method: {ping_method}\n- Failed Pings Before Offline: {ping_attempts_before_failure}\n- Ping Interval: {ping_interval} seconds\n\n**Sensors:** {sensors}\n\n⏱️ **Offline Detection Time:** about {detection_time}\n\nPress Submit to complete the configuration."
             },
             "monitor_parameters": {
                 "title": "Ping Parameters",
@@ -147,7 +147,7 @@
             },
             "integration_summary": {
                 "title": "Configuration Summary",
-                "description": "**Integration:** {integration_name}\n**Devices:** {device_summary}\n**Ping Settings:**\n- Failed Pings Before Offline: {ping_attempts_before_failure}\n- Ping Interval: {ping_interval} seconds\n\n**Sensors:** {sensors}\n\n⏱️ **Offline Detection Time:** about {detection_time}\n\nPress Submit to complete the configuration."
+                "description": "**Integration:** {integration_name}\n**Devices:** {device_summary}\n**Ping Settings:**\n- Method: {ping_method}\n- Failed Pings Before Offline: {ping_attempts_before_failure}\n- Ping Interval: {ping_interval} seconds\n\n**Sensors:** {sensors}\n\n⏱️ **Offline Detection Time:** about {detection_time}\n\nPress Submit to complete the configuration."
             },
             "custom_group_edit_action": {
                 "title": "Edit Devices Group",
@@ -194,7 +194,7 @@
             },
             "custom_group_summary": {
                 "title": "Group Summary",
-                "description": "**Group:** {group_name}\n**Devices:**\n{group_devices_list}\n\n**Ping Settings:**\n- Failed Pings Before Offline: {ping_attempts_before_failure}\n- Ping Interval: {ping_interval} seconds\n\n**Sensors:** {sensors}\n\n⏱️ **Offline Detection Time:** about {detection_time}\n\nPress Submit to complete the configuration."
+                "description": "**Group:** {group_name}\n**Devices:**\n{group_devices_list}\n\n**Ping Settings:**\n- Method: {ping_method}\n- Failed Pings Before Offline: {ping_attempts_before_failure}\n- Ping Interval: {ping_interval} seconds\n\n**Sensors:** {sensors}\n\n⏱️ **Offline Detection Time:** about {detection_time}\n\nPress Submit to complete the configuration."
             },
             "monitor_parameters": {
                 "title": "Ping Parameters",

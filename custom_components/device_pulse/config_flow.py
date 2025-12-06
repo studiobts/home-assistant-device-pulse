@@ -440,6 +440,8 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
             self.ping_attempts_before_failure, self.ping_interval
         )
 
+        ping_method_label = "ICMP Ping" if self.ping_method == PING_METHOD_ICMP else "ARP Ping"
+
         data_schema = vol.Schema({})
 
         return self.async_show_form(
@@ -451,6 +453,7 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
                 "device_summary": device_summary,
                 "ping_attempts_before_failure": str(self.ping_attempts_before_failure),
                 "ping_interval": str(self.ping_interval),
+                "ping_method": ping_method_label,
                 "sensors": sensors_summary,
                 "detection_time": detection_time,
             },
@@ -586,6 +589,8 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
             self.ping_attempts_before_failure, self.ping_interval
         )
 
+        ping_method_label = "ICMP Ping" if self.ping_method == PING_METHOD_ICMP else "ARP Ping"
+
         data_schema = vol.Schema({})
 
         return self.async_show_form(
@@ -597,6 +602,7 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
                 "group_devices_list": group_devices_list,
                 "ping_attempts_before_failure": str(self.ping_attempts_before_failure),
                 "ping_interval": str(self.ping_interval),
+                "ping_method": ping_method_label,
                 "sensors": sensors_summary,
                 "detection_time": detection_time,
             },
