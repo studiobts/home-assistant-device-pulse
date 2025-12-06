@@ -12,7 +12,6 @@ from homeassistant.helpers import selector
 import homeassistant.helpers.device_registry as dr
 from homeassistant.util import uuid
 
-from .arping import is_arping_available
 from .const import (
     CONF_DEVICE_SELECTION_MODE,
     CONF_ENTRY_TYPE,
@@ -55,6 +54,7 @@ from .utils import (
     format_duration,
     get_integration_devices_valid,
     get_valid_integrations_for_monitoring,
+    is_arping_available,
     is_host_in_local_subnet,
     is_valid_hostname_or_ip,
 )

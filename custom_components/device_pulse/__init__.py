@@ -19,7 +19,7 @@ from homeassistant.util.hass_dict import HassKey
 
 from . import utils
 from . import websocket_api
-from .arping import PingDataARP, is_arping_available
+from .arping import PingDataARP
 from .const import (
     CONF_DEVICE_SELECTION_MODE,
     CONF_ENTRY_TYPE,
@@ -103,7 +103,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     _LOGGER.debug("Privileged ICMP ping available: %s", ping_icmp_privileged)
 
     # Check if arping is available for ARP ping support
-    if ping_arp_available := await is_arping_available(hass):
+    if ping_arp_available := await utils.is_arping_available(hass):
         _LOGGER.info("ARP ping support available (arping command found)")
     else:
         _LOGGER.warning(

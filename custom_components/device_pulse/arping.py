@@ -6,28 +6,12 @@ import asyncio
 import logging
 from typing import Any
 
+from homeassistant.components.network import Adapter
 from homeassistant.core import HomeAssistant
 
+from .utils import get_network_adapter_for_ip
+
 _LOGGER = logging.getLogger(__name__)
-
-async def is_arping_available(hass: HomeAssistant) -> bool:
-    """Check if arping command is available on the system."""
-    import shutil
-
-    try:
-        # Check if arping is in PATH
-        # noinspection PyUnresolvedReferences,PyTypeChecker
-        arping_path = await hass.async_add_executor_job(shutil.which, "arping")
-        if arping_path:
-            _LOGGER.debug("arping command found at: %s", arping_path)
-            return True
-
-        _LOGGER.debug("arping command not found in system PATH")
-        return False
-    except Exception as err:
-        _LOGGER.warning("Error checking arping availability: %s", err)
-        return False
-
 
 class PingDataARP:
     """Handle ARP ping requests."""
@@ -39,13 +23,18 @@ class PingDataARP:
         self.count = count
         self.is_alive = False
         self.data: dict[str, Any] | None = None
+        self._adapter: Adapter | None = None
 
     async def async_update(self) -> None:
         """Send ARP request to check if the host is alive."""
+        if not self._adapter:
+            self._adapter, _, __ = await get_network_adapter_for_ip(self.hass, self.ip_address)
+
         # Use arping command to check if the host responds to ARP
         # -c: count,
         # -w: timeout in seconds
-        cmd = ["arping", "-c", str(self.count), "-w", "1", self.ip_address]
+        # -I: interface
+        cmd = ["arping", "-c", str(self.count), "-w", "1", "-I", self._adapter.get("name"), self.ip_address]
 
         try:
             process = await asyncio.create_subprocess_exec(

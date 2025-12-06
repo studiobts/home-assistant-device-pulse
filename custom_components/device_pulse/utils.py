@@ -8,14 +8,13 @@ from zeroconf.asyncio import AsyncServiceInfo
 
 from homeassistant.config_entries import ConfigEntry, SOURCE_ZEROCONF
 from homeassistant.components import zeroconf
-from homeassistant.components.network import async_get_source_ip
+from homeassistant.components.network import async_get_adapters, async_get_source_ip, Adapter
 from homeassistant.core import HomeAssistant
 from homeassistant.loader import async_get_integration
 from homeassistant.helpers import device_registry as dr, entity_registry as er
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_registry import RegistryEntry as EntityEntry
 
-from .arping import is_arping_available
 from .const import (
     DOMAIN,
     HOST_PARAM_NAMES,
@@ -347,6 +346,45 @@ async def resolve_hostname_to_ip(hass: HomeAssistant, hostname: str) -> str | No
         _LOGGER.warning("Unexpected error resolving hostname %s: %s", hostname, err)
         return None
 
+async def is_arping_available(hass: HomeAssistant) -> bool:
+    """Check if arping command is available on the system."""
+    import shutil
+
+    try:
+        # Check if arping is in PATH
+        # noinspection PyUnresolvedReferences,PyTypeChecker
+        arping_path = await hass.async_add_executor_job(shutil.which, "arping")
+        if arping_path:
+            _LOGGER.debug("arping command found at: %s", arping_path)
+            return True
+
+        _LOGGER.debug("arping command not found in system PATH")
+        return False
+    except Exception as err:
+        _LOGGER.warning("Error checking arping availability: %s", err)
+        return False
+
+async def get_network_adapter_for_ip(hass: HomeAssistant, ip_address: str) -> tuple[Adapter | None, str | None, int | None]:
+    """Get the network adapter for an IP address, returns also HA IP address and netmask."""
+    ha_ip = await async_get_source_ip(hass, target_ip=ip_address)
+    if not ha_ip:
+        _LOGGER.debug("Cannot determine Home Assistant IP address")
+        return None, None, None
+
+    # Get network adapters information to retrieve actual subnet mask
+    adapters = await async_get_adapters(hass)
+    if not adapters:
+        _LOGGER.debug("Cannot retrieve network adapters information")
+        return None, None, None
+
+    # Find the adapter that has the HA IP and get its subnet mask
+    for adapter in adapters:
+        for ip_info in adapter.get("ipv4", []):
+            if ip_info.get("address") == ha_ip:
+                return adapter, ha_ip, ip_info.get("network_prefix")
+
+    return None, None, None
+
 
 async def is_host_in_local_subnet(hass: HomeAssistant, host: str) -> bool | str:
     """Check if a host (IP or hostname) is in the same subnet as Home Assistant.
@@ -362,38 +400,15 @@ async def is_host_in_local_subnet(hass: HomeAssistant, host: str) -> bool | str:
         else:
             host_ip = host
 
-        # Get Home Assistant's IP address
-        ha_ip = await async_get_source_ip(hass, target_ip=host_ip)
-        if not ha_ip:
-            _LOGGER.debug("Cannot determine Home Assistant IP address")
-            return False
-
-        # Get network adapters information to retrieve actual subnet mask
-        from homeassistant.components.network import async_get_adapters
-
-        adapters = await async_get_adapters(hass)
-        if not adapters:
-            _LOGGER.debug("Cannot retrieve network adapters information")
-            return False
-
         # Find the adapter that has the HA IP and get its subnet mask
-        subnet_mask = None
-        for adapter in adapters:
-            for ip_info in adapter.get("ipv4", []):
-                if ip_info.get("address") == ha_ip:
-                    # Get prefix length (e.g., 24 for /24)
-                    subnet_mask = ip_info.get("network_prefix")
-                    break
-            if subnet_mask is not None:
-                break
-
-        if subnet_mask is None:
-            _LOGGER.debug("Cannot determine subnet mask for HA IP %s", ha_ip)
+        adapter, ha_ip, ha_netmask = await get_network_adapter_for_ip(hass, host_ip)
+        if not adapter:
+            _LOGGER.debug("Cannot determine subnet for IP %s: no matching adapter found", host_ip)
             return False
 
         # Create networks with actual subnet mask
-        host_network = ipaddress.IPv4Network(f"{host_ip}/{subnet_mask}", strict=False)
-        ha_network = ipaddress.IPv4Network(f"{ha_ip}/{subnet_mask}", strict=False)
+        host_network = ipaddress.IPv4Network(f"{host_ip}/{ha_netmask}", strict=False)
+        ha_network = ipaddress.IPv4Network(f"{ha_ip}/{ha_netmask}", strict=False)
 
         in_same_subnet = host_network == ha_network
 
@@ -403,7 +418,7 @@ async def is_host_in_local_subnet(hass: HomeAssistant, host: str) -> bool | str:
             host_network,
             ha_ip,
             ha_network,
-            subnet_mask,
+            ha_netmask,
             in_same_subnet,
         )
 
