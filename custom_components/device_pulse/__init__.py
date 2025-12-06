@@ -19,6 +19,7 @@ from homeassistant.util.hass_dict import HassKey
 
 from . import utils
 from . import websocket_api
+from .arping import PingDataARP, is_arping_available
 from .const import (
     CONF_DEVICE_SELECTION_MODE,
     CONF_ENTRY_TYPE,
@@ -31,9 +32,11 @@ from .const import (
     CONF_GROUP_DEVICE_HOST,
     CONF_PING_ATTEMPTS_BEFORE_FAILURE,
     CONF_PING_INTERVAL,
+    CONF_PING_METHOD,
     CONF_SELECTED_DEVICES,
     DEFAULT_PING_ATTEMPTS_BEFORE_FAILURE,
     DEFAULT_PING_INTERVAL,
+    DEFAULT_PING_METHOD,
     DEVICE_SELECTION_ALL,
     DEVICE_SELECTION_EXCLUDE,
     DEVICE_SELECTION_INCLUDE,
@@ -46,6 +49,8 @@ from .const import (
     EVENT_DEVICE_WENT_OFFLINE,
     EVENT_DEVICE_CAME_ONLINE,
     NETWORK_SUMMARY_ENTRY_ID,
+    PING_METHOD_ARP,
+    PING_METHOD_ICMP,
     PLATFORMS,
 )
 from .coordinator import DevicePingCoordinator
@@ -68,7 +73,8 @@ class ConfigMonitoredIntegrationData:
 class ConfigData:
     """Holds configuration data for the Device Pulse integration."""
 
-    ping_privileged: bool | None # Flag to true if privileged ping is available
+    ping_icmp_privileged: bool | None # Flag to true if privileged ICMP ping is available
+    ping_arp_available: bool | None # Flag to true if ARP ping is available
     integrations: dict[str, utils.IntegrationData]
     monitored: dict[str, ConfigMonitoredIntegrationData] = field(default_factory=dict)
 
@@ -92,9 +98,19 @@ class ConfigEntryRuntimeData:
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the integration."""
-    # Determine if privileged ping is available
-    ping_privileged = await _can_use_icmp_lib_with_privilege()
-    _LOGGER.debug("Privileged ping available: %s", ping_privileged)
+    # Determine if privileged ICMP ping is available
+    ping_icmp_privileged = await _can_use_icmp_lib_with_privilege()
+    _LOGGER.debug("Privileged ICMP ping available: %s", ping_icmp_privileged)
+
+    # Check if arping is available for ARP ping support
+    if ping_arp_available := await is_arping_available(hass):
+        _LOGGER.info("ARP ping support available (arping command found)")
+    else:
+        _LOGGER.warning(
+            "ARP ping support not available (arping command not found). "
+            "Install iputils-arping package to enable ARP ping functionality"
+        )
+
     # Build initial list of integrations valid for monitoring
     integrations = await utils.get_valid_integrations_for_monitoring(hass)
     _LOGGER.info("Found %d valid integrations for monitoring: %s",
@@ -103,7 +119,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     )
     # Store in hass data
     hass.data[DATA_CONFIG_KEY] = ConfigData(
-        ping_privileged,
+        ping_icmp_privileged,
+        ping_arp_available,
         integrations
     )
 
@@ -185,15 +202,29 @@ async def async_setup_entry(
 
         ping_attempts_before_failure: int = int(config_entry.options.get(CONF_PING_ATTEMPTS_BEFORE_FAILURE, DEFAULT_PING_ATTEMPTS_BEFORE_FAILURE))
         ping_interval: int = int(config_entry.options.get(CONF_PING_INTERVAL, DEFAULT_PING_INTERVAL))
+        ping_method: str = config_entry.options.get(CONF_PING_METHOD, DEFAULT_PING_METHOD)
 
         _LOGGER.info("[%s]   Attempts Before Failure: %d", integration.friendly_name, ping_attempts_before_failure)
         _LOGGER.info("[%s]   Interval: %ds", integration.friendly_name, ping_interval)
+        _LOGGER.info("[%s]   Ping Method: %s", integration.friendly_name, ping_method)
         _LOGGER.info("[%s] Found [%d] valid devices", integration.friendly_name, len(devices))
 
-        # Determine ping client based on privileges
-        ping: type[PingDataICMPLib | PingDataSubProcess]
-        privileged = hass.data[DATA_CONFIG_KEY].ping_privileged
-        ping = PingDataSubProcess if privileged is None else PingDataICMPLib
+        # Determine the ICMP ping client based on method and privileges
+        ping_icmp: type[PingDataICMPLib | PingDataSubProcess]
+        ping_icmp_privileged = hass.data[DATA_CONFIG_KEY].ping_icmp_privileged
+        ping_icmp = PingDataSubProcess if ping_icmp_privileged is None else PingDataICMPLib
+
+        ping_arp: type[PingDataARP] | None = None
+        if ping_method == PING_METHOD_ARP:
+            # Verify arping is available when the ARP method is selected
+            if not hass.data[DATA_CONFIG_KEY].ping_arp_available:
+                _LOGGER.error(
+                    "[%s] ARP ping method selected but arping command not found. "
+                    "Please install iputils-arping package. Falling back to ICMP ping",
+                    integration.friendly_name,
+                )
+            else:
+                ping_arp = PingDataARP
 
         disabled_devices = []
 
@@ -213,13 +244,19 @@ async def async_setup_entry(
                     _LOGGER.warning("[%s]   Device not included [%s]", device.name, integration.friendly_name)
                     continue
 
-                # Create the coordinator for the device
+                # For ARP ping, check if device ip address is in local subnet,
+                # otherwise fallback to ICMP ping
+                if ping_arp and (resolved_ip := await utils.is_host_in_local_subnet(hass, host)):
+                    ping_instance = PingDataARP(hass, resolved_ip, 1)
+                else:
+                    ping_instance = ping_icmp(hass, host, 1, ping_icmp_privileged)
+
                 coordinator = DevicePingCoordinator(
                     hass,
                     config_entry,
                     integration,
                     device,
-                    ping(hass, host, 1, privileged),
+                    ping_instance,
                     ping_attempts_before_failure,
                     ping_interval
                 )

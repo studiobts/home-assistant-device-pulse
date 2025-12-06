@@ -12,12 +12,14 @@ from homeassistant.helpers import selector
 import homeassistant.helpers.device_registry as dr
 from homeassistant.util import uuid
 
+from .arping import is_arping_available
 from .const import (
     CONF_DEVICE_SELECTION_MODE,
     CONF_ENTRY_TYPE,
     CONF_INTEGRATION,
     CONF_PING_ATTEMPTS_BEFORE_FAILURE,
     CONF_PING_INTERVAL,
+    CONF_PING_METHOD,
     CONF_SELECTED_DEVICES,
     CONF_SENSORS_INTEGRATION_SUMMARY_ENABLED,
     CONF_SENSORS_DISCONNECTED_SINCE_ENABLED,
@@ -31,6 +33,7 @@ from .const import (
     CONF_GROUP_DEVICE_HOST,
     DEFAULT_PING_ATTEMPTS_BEFORE_FAILURE,
     DEFAULT_PING_INTERVAL,
+    DEFAULT_PING_METHOD,
     DEFAULT_SENSORS_INTEGRATION_SUMMARY_ENABLED,
     DEFAULT_SENSORS_DISCONNECTED_SINCE_ENABLED,
     DEFAULT_SENSORS_FAILED_PINGS_ENABLED,
@@ -43,12 +46,16 @@ from .const import (
     ENTRY_TYPE_INTEGRATION,
     ENTRY_TYPE_NETWORK_SUMMARY,
     NETWORK_SUMMARY_ENTRY_ID,
+    PING_METHOD_ARP,
+    PING_METHOD_ICMP,
 )
 from .utils import (
     IntegrationData,
+    check_devices_support_arp_ping,
     format_duration,
     get_integration_devices_valid,
     get_valid_integrations_for_monitoring,
+    is_host_in_local_subnet,
     is_valid_hostname_or_ip,
 )
 
@@ -82,6 +89,8 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
     integration_device_selection_mode = DEVICE_SELECTION_ALL
     integration_available_devices = []
     integration_selected_devices = []
+    integration_supports_arp = False
+    integration_arp_unavailable_reason: str | None = None
 
     custom_group_name: str | None = None
     custom_group_devices: list[dict[str, str]] = []
@@ -90,6 +99,7 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
 
     ping_attempts_before_failure: int = DEFAULT_PING_ATTEMPTS_BEFORE_FAILURE
     ping_interval: int = DEFAULT_PING_INTERVAL
+    ping_method: str = DEFAULT_PING_METHOD
     sensors_integration_summary_enabled = DEFAULT_SENSORS_INTEGRATION_SUMMARY_ENABLED
     sensors_failed_pings_enabled = DEFAULT_SENSORS_FAILED_PINGS_ENABLED
     sensors_disconnected_since_enabled = DEFAULT_SENSORS_DISCONNECTED_SINCE_ENABLED
@@ -102,8 +112,49 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
         if user_input is not None:
             self.ping_attempts_before_failure = int(user_input[CONF_PING_ATTEMPTS_BEFORE_FAILURE])
             self.ping_interval = int(user_input[CONF_PING_INTERVAL])
+            self.ping_method = user_input[CONF_PING_METHOD]
 
             return await self.async_step_monitor_sensors()
+
+        # Build ping method options
+        ping_options = [
+            selector.SelectOptionDict(
+                value=PING_METHOD_ICMP,
+                label="ICMP Ping (Standard)",
+            )
+        ]
+
+        # Build description with a warning if ARP is not available
+        description_placeholders = {
+            "arp_warning": ""
+        }
+
+        # Add ARP option only if available
+        if self.integration_supports_arp:
+            ping_options.append(
+                selector.SelectOptionDict(
+                    value=PING_METHOD_ARP,
+                    label="ARP Ping (Local Subnet Only)",
+                )
+            )
+        else:
+            # Force ICMP if ARP not supported
+            self.ping_method = PING_METHOD_ICMP
+
+            if self.integration_arp_unavailable_reason == "arping_not_installed":
+                description_placeholders["arp_warning"] = (
+                    "\n\n⚠️ **ARP Ping is not available**: The `arping` command is not installed on your system. "
+                    "Install the `iputils-arping` package to enable ARP ping functionality."
+                )
+            elif self.integration_arp_unavailable_reason == "no_local_devices":
+                description_placeholders["arp_warning"] = (
+                    "\n\n⚠️ **ARP Ping is not available**: None of the selected devices are in the same local subnet as Home Assistant. "
+                    "ARP ping only works for devices in the same subnet."
+                )
+            else:
+                description_placeholders["arp_warning"] = (
+                    "\n\n⚠️ **ARP Ping is not available**: Requirements not met for ARP ping functionality."
+                )
 
         data_schema = vol.Schema(
             {
@@ -129,6 +180,14 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
                         unit_of_measurement="seconds",
                     )
                 ),
+                vol.Required(
+                    CONF_PING_METHOD, default=self.ping_method
+                ): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=ping_options,
+                        mode=selector.SelectSelectorMode.DROPDOWN,
+                    )
+                )
             }
         )
 
@@ -136,6 +195,7 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
             step_id="monitor_parameters",
             data_schema=data_schema,
             errors=errors,
+            description_placeholders=description_placeholders,
             last_step=False,
         )
 
@@ -218,6 +278,15 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
             elif self.integration_device_selection_mode == DEVICE_SELECTION_INCLUDE:
                 return await self.async_step_integration_select_included_devices()
 
+            # Check ARP support before going to ping method selection
+            from homeassistant.components import zeroconf
+            zc = await zeroconf.async_get_instance(self.hass)
+            self.integration_supports_arp, self.integration_arp_unavailable_reason = (
+                await check_devices_support_arp_ping(
+                    self.hass, self.integration_available_devices, zc
+                )
+            )
+
             return await self.async_step_monitor_parameters()
 
         self.integration_available_devices = await get_integration_devices_valid(self.hass, self.integration_selected)
@@ -268,6 +337,31 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
                 errors["base"] = "select_at_least_one_device"
             else:
                 self.integration_selected_devices = selected
+
+                # Check ARP support for selected/remaining devices
+                from homeassistant.components import zeroconf
+                zc = await zeroconf.async_get_instance(self.hass)
+
+                # Determine which devices to check based on mode
+                if self.integration_device_selection_mode == DEVICE_SELECTION_EXCLUDE:
+                    # Check devices that are NOT excluded
+                    devices_to_check = [
+                        d for d in self.integration_available_devices
+                        if d.id not in selected
+                    ]
+                else:
+                    # Check only included devices
+                    devices_to_check = [
+                        d for d in self.integration_available_devices
+                        if d.id in selected
+                    ]
+
+                self.integration_supports_arp, self.integration_arp_unavailable_reason = (
+                    await check_devices_support_arp_ping(
+                        self.hass, devices_to_check, zc
+                    )
+                )
+
                 return await self.async_step_monitor_parameters()
 
         device_options = [
@@ -436,6 +530,24 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
 
             if action == "add_device":
                 return await self.async_step_custom_group_add_device()
+
+            # Check if any device in the custom group supports ARP ping
+            # First, check if arping is available
+            if not await is_arping_available(self.hass):
+                self.integration_supports_arp = False
+                self.integration_arp_unavailable_reason = "arping_not_installed"
+            else:
+                # Then check if any device is in the local subnet
+                self.integration_supports_arp = False
+                for device in self.custom_group_devices:
+                    host = device.get(CONF_GROUP_DEVICE_HOST)
+                    if host and await is_host_in_local_subnet(self.hass, host):
+                        self.integration_supports_arp = True
+                        self.integration_arp_unavailable_reason = None
+                        break
+
+                if not self.integration_supports_arp:
+                    self.integration_arp_unavailable_reason = "no_local_devices"
 
             return await self.async_step_monitor_parameters()
 
@@ -624,6 +736,7 @@ class DevicePingMonitorConfigFlow(
                 else [],
                 CONF_PING_ATTEMPTS_BEFORE_FAILURE: self.ping_attempts_before_failure,
                 CONF_PING_INTERVAL: self.ping_interval,
+                CONF_PING_METHOD: self.ping_method,
                 CONF_DEVICE_SELECTION_MODE: self.integration_device_selection_mode,
                 CONF_SENSORS_INTEGRATION_SUMMARY_ENABLED: self.sensors_integration_summary_enabled,
                 CONF_SENSORS_FAILED_PINGS_ENABLED: self.sensors_failed_pings_enabled,
@@ -644,6 +757,7 @@ class DevicePingMonitorConfigFlow(
                 CONF_GROUP_DEVICES_LIST: self.custom_group_devices,
                 CONF_PING_ATTEMPTS_BEFORE_FAILURE: self.ping_attempts_before_failure,
                 CONF_PING_INTERVAL: self.ping_interval,
+                CONF_PING_METHOD: self.ping_method,
                 CONF_SENSORS_INTEGRATION_SUMMARY_ENABLED: self.sensors_integration_summary_enabled,
                 CONF_SENSORS_FAILED_PINGS_ENABLED: self.sensors_failed_pings_enabled,
                 CONF_SENSORS_DISCONNECTED_SINCE_ENABLED: self.sensors_disconnected_since_enabled,
@@ -669,6 +783,7 @@ class DevicePingMonitorOptionsFlow(
 
         self.ping_attempts_before_failure = self.config_entry.options.get(CONF_PING_ATTEMPTS_BEFORE_FAILURE, DEFAULT_PING_ATTEMPTS_BEFORE_FAILURE)
         self.ping_interval = self.config_entry.options.get(CONF_PING_INTERVAL, DEFAULT_PING_INTERVAL)
+        self.ping_method = self.config_entry.options.get(CONF_PING_METHOD, DEFAULT_PING_METHOD)
         self.sensors_integration_summary_enabled = self.config_entry.options.get(CONF_SENSORS_INTEGRATION_SUMMARY_ENABLED, DEFAULT_SENSORS_INTEGRATION_SUMMARY_ENABLED)
         self.sensors_failed_pings_enabled = self.config_entry.options.get(CONF_SENSORS_FAILED_PINGS_ENABLED, DEFAULT_SENSORS_FAILED_PINGS_ENABLED)
         self.sensors_disconnected_since_enabled = self.config_entry.options.get(CONF_SENSORS_DISCONNECTED_SINCE_ENABLED, DEFAULT_SENSORS_DISCONNECTED_SINCE_ENABLED)
@@ -860,6 +975,7 @@ class DevicePingMonitorOptionsFlow(
                 # Common entry data
                 CONF_PING_ATTEMPTS_BEFORE_FAILURE: self.ping_attempts_before_failure,
                 CONF_PING_INTERVAL: self.ping_interval,
+                CONF_PING_METHOD: self.ping_method,
                 CONF_SENSORS_INTEGRATION_SUMMARY_ENABLED: self.sensors_integration_summary_enabled,
                 CONF_SENSORS_FAILED_PINGS_ENABLED: self.sensors_failed_pings_enabled,
                 CONF_SENSORS_DISCONNECTED_SINCE_ENABLED: self.sensors_disconnected_since_enabled,
@@ -876,6 +992,7 @@ class DevicePingMonitorOptionsFlow(
                 # Common entry data
                 CONF_PING_ATTEMPTS_BEFORE_FAILURE: self.ping_attempts_before_failure,
                 CONF_PING_INTERVAL: self.ping_interval,
+                CONF_PING_METHOD: self.ping_method,
                 CONF_SENSORS_INTEGRATION_SUMMARY_ENABLED: self.sensors_integration_summary_enabled,
                 CONF_SENSORS_FAILED_PINGS_ENABLED: self.sensors_failed_pings_enabled,
                 CONF_SENSORS_DISCONNECTED_SINCE_ENABLED: self.sensors_disconnected_since_enabled,

@@ -5,6 +5,7 @@ import logging
 from custom_components.device_pulse.const import (
     ENTITY_ATTR_STATE_SINCE,
     ENTITY_ATTR_PINGS_FAILED,
+    ENTITY_ATTR_PING_METHOD,
     ENTITY_TAG_PING_STATUS
 )
 
@@ -76,5 +77,6 @@ class DevicePingStatusBinarySensor(BaseCoordinatorEntity, BinarySensorEntity, Re
         return {
             **super().extra_state_attributes,
             ENTITY_ATTR_STATE_SINCE: self._state_since,
-            ENTITY_ATTR_PINGS_FAILED: self.coordinator.failed_pings > 0
+            ENTITY_ATTR_PINGS_FAILED: self.coordinator.failed_pings > 0,
+            ENTITY_ATTR_PING_METHOD: self.coordinator.ping_method
         }

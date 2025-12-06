@@ -3,16 +3,19 @@ from dataclasses import dataclass
 import ipaddress
 import logging
 import re
+import socket
 from zeroconf.asyncio import AsyncServiceInfo
 
 from homeassistant.config_entries import ConfigEntry, SOURCE_ZEROCONF
 from homeassistant.components import zeroconf
+from homeassistant.components.network import async_get_source_ip
 from homeassistant.core import HomeAssistant
 from homeassistant.loader import async_get_integration
 from homeassistant.helpers import device_registry as dr, entity_registry as er
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_registry import RegistryEntry as EntityEntry
 
+from .arping import is_arping_available
 from .const import (
     DOMAIN,
     HOST_PARAM_NAMES,
@@ -247,14 +250,18 @@ def is_tagged_entity_entry(entry: EntityEntry, tag: str) -> bool:
         and tag in entry.unique_id
     )
 
-
-def is_valid_hostname_or_ip(value) -> bool:
-    # Prova IPv4
+def is_valid_ip(value: str) -> bool:
+    """Check if a value is a valid IPv4 address."""
     try:
         ipaddress.IPv4Address(value)
         return True
     except ValueError:
-        pass
+        return False
+
+def is_valid_hostname_or_ip(value) -> bool:
+    """Check if a value is a valid hostname or IP address."""
+    if is_valid_ip(value):
+        return True
 
     # Check hostname (RFC 1123)
     hostname_regex = re.compile(
@@ -322,3 +329,112 @@ def format_duration(seconds: float) -> str:
     parts.append(f"{secs}s")
 
     return " ".join(parts)
+
+
+async def resolve_hostname_to_ip(hass: HomeAssistant, hostname: str) -> str | None:
+    """Resolve a hostname to an IP address."""
+    try:
+        # Use executor to avoid blocking the event loop
+        ip_address = await hass.async_add_executor_job(
+            socket.gethostbyname, hostname
+        )
+        _LOGGER.debug("Resolved hostname %s to IP %s", hostname, ip_address)
+        return ip_address
+    except socket.gaierror as err:
+        _LOGGER.debug("Failed to resolve hostname %s: %s", hostname, err)
+        return None
+    except Exception as err:
+        _LOGGER.warning("Unexpected error resolving hostname %s: %s", hostname, err)
+        return None
+
+
+async def is_host_in_local_subnet(hass: HomeAssistant, host: str) -> bool | str:
+    """Check if a host (IP or hostname) is in the same subnet as Home Assistant.
+    If true, returns the IP address of the host. Otherwise, returns False.
+    """
+    try:
+        # Resolve the hostname if needed
+        if not is_valid_ip(host):
+            host_ip = await resolve_hostname_to_ip(hass, host)
+            if not host_ip:
+                _LOGGER.debug("Cannot determine subnet for hostname %s: resolution failed", host)
+                return False
+        else:
+            host_ip = host
+
+        # Get Home Assistant's IP address
+        ha_ip = await async_get_source_ip(hass, target_ip=host_ip)
+        if not ha_ip:
+            _LOGGER.debug("Cannot determine Home Assistant IP address")
+            return False
+
+        # Get network adapters information to retrieve actual subnet mask
+        from homeassistant.components.network import async_get_adapters
+
+        adapters = await async_get_adapters(hass)
+        if not adapters:
+            _LOGGER.debug("Cannot retrieve network adapters information")
+            return False
+
+        # Find the adapter that has the HA IP and get its subnet mask
+        subnet_mask = None
+        for adapter in adapters:
+            for ip_info in adapter.get("ipv4", []):
+                if ip_info.get("address") == ha_ip:
+                    # Get prefix length (e.g., 24 for /24)
+                    subnet_mask = ip_info.get("network_prefix")
+                    break
+            if subnet_mask is not None:
+                break
+
+        if subnet_mask is None:
+            _LOGGER.debug("Cannot determine subnet mask for HA IP %s", ha_ip)
+            return False
+
+        # Create networks with actual subnet mask
+        host_network = ipaddress.IPv4Network(f"{host_ip}/{subnet_mask}", strict=False)
+        ha_network = ipaddress.IPv4Network(f"{ha_ip}/{subnet_mask}", strict=False)
+
+        in_same_subnet = host_network == ha_network
+
+        _LOGGER.debug(
+            "Subnet check: host=%s (%s), HA=%s (%s), mask=/%s, same_subnet=%s",
+            host,
+            host_network,
+            ha_ip,
+            ha_network,
+            subnet_mask,
+            in_same_subnet,
+        )
+
+        return host_ip if in_same_subnet else False
+
+    except (ValueError, ipaddress.AddressValueError) as err:
+        _LOGGER.debug("Error checking subnet for %s: %s", host, err)
+        return False
+    except Exception as err:
+        _LOGGER.warning("Unexpected error checking subnet for %s: %s", host, err)
+        return False
+
+
+async def check_devices_support_arp_ping(
+    hass: HomeAssistant, devices: list[dr.DeviceEntry], zc: zeroconf.models.HaZeroconf
+) -> tuple[bool, str | None]:
+    """Check if at least one device in the list supports ARP ping (is in the local subnet).
+
+    Returns:
+        tuple[bool, str | None]: (supports_arp, reason_if_not_supported)
+    """
+    # First, check if arping is available
+    if not await is_arping_available(hass):
+        _LOGGER.debug("arping not available, ARP ping not supported")
+        return False, "arping_not_installed"
+
+    # Then check if any device is in the local subnet
+    for device in devices:
+        host = await extract_device_host(hass, device, zc)
+        if host and await is_host_in_local_subnet(hass, host):
+            return True, None
+
+    return False, "no_local_devices"
+

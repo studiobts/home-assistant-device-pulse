@@ -80,10 +80,29 @@ For both configuration modes, you can define:
 
 - The **number of failed ping attempts** required before a device is considered disconnected.
 - The **interval time** between each ping request.
+- The **ping method** to use (ICMP or ARP).
 
 <p float="left">
   <img src="https://github.com/studiobts/home-assistant-device-pulse/blob/main/images/config_flow_ping_parameters.png?raw=true" height="350" />
 </p>
+
+### Ping Method Selection
+
+Device Pulse supports two ping methods for monitoring devices:
+
+- **ICMP Ping (Standard)**: Uses the traditional ICMP protocol to check device availability. Works for any device on any network (local or remote).
+
+- **ARP Ping (Local Subnet Only)**: Uses ARP (Address Resolution Protocol) requests to check device availability. Only works for devices in the same local subnet as Home Assistant, but it's more reliable for devices that don't respond to ICMP ping (some devices have ICMP disabled for security reasons).
+
+**Note**: The ARP Ping option is only shown if at least one device is detected to be in the same subnet as Home Assistant. ARP ping requires the `arping` command to be installed on your system:
+
+```bash
+# For Debian/Ubuntu-based systems (including Home Assistant OS)
+apt-get install iputils-arping
+```
+
+If you're using hostnames instead of IP addresses, Device Pulse will automatically resolve them to determine subnet compatibility and will resolve them at runtime when using ARP ping.
+
 
 ---
 

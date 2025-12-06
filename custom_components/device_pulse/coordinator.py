@@ -18,7 +18,10 @@ from .const import (
     DEFAULT_PING_INTERVAL,
     EVENT_DEVICE_CAME_ONLINE,
     EVENT_DEVICE_WENT_OFFLINE,
+    PING_METHOD_ARP,
+    PING_METHOD_ICMP
 )
+from .arping import PingDataARP
 from .utils import IntegrationData, format_duration
 
 _LOGGER = logging.getLogger(__name__)
@@ -42,7 +45,7 @@ class DevicePingCoordinator(DataUpdateCoordinator[PingResult]):
         config_entry: ConfigEntry,
         integration: IntegrationData,
         device_entry: DeviceEntry,
-        ping: PingDataICMPLib | PingDataSubProcess,
+        ping: PingDataICMPLib | PingDataSubProcess | PingDataARP,
         ping_attempts_before_failure: int = DEFAULT_PING_ATTEMPTS_BEFORE_FAILURE,
         ping_interval: int = DEFAULT_PING_INTERVAL,
     ) -> None:
@@ -192,3 +195,11 @@ class DevicePingCoordinator(DataUpdateCoordinator[PingResult]):
         jittered_interval = self.ping_interval + random.uniform(-variation, variation)
 
         return timedelta(milliseconds=jittered_interval)
+
+    @property
+    def ping_method(self) -> str:
+        """Return the ping method being used (ICMP or ARP)."""
+        if isinstance(self.ping, PingDataARP):
+            return PING_METHOD_ARP
+        return PING_METHOD_ICMP
+

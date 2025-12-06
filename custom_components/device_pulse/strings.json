@@ -78,14 +78,16 @@
             },
             "monitor_parameters": {
                 "title": "Ping Parameters",
-                "description": "**Set the rules for how devices are monitored through ping.** Define how many failed pings are needed before a device is considered offline, and how often each device should be pinged.",
+                "description": "**Set the rules for how devices are monitored through ping.** Define how many failed pings are needed before a device is considered offline, and how often each device should be pinged.{arp_warning}",
                 "data": {
                     "ping_attempts_before_failure": "Failed Pings Before Offline",
-                    "ping_interval": "Ping Interval"
+                    "ping_interval": "Ping Interval",
+                    "ping_method": "Ping Method"
                 },
                 "data_description": {
                     "ping_attempts_before_failure": "Number of consecutive failed pings before considering the device offline",
-                    "ping_interval": "Time between ping checks"
+                    "ping_interval": "Time between ping checks",
+                    "ping_method": "Select the ping method to use for monitoring"
                 }
             },
             "monitor_sensors": {
@@ -196,14 +198,16 @@
             },
             "monitor_parameters": {
                 "title": "Ping Parameters",
-                "description": "**Set the rules for how devices are monitored through ping.** Define how many failed pings are needed before a device is considered offline, and how often each device should be pinged.",
+                "description": "**Set the rules for how devices are monitored through ping.** Define how many failed pings are needed before a device is considered offline, and how often each device should be pinged.{arp_warning}",
                 "data": {
                     "ping_attempts_before_failure": "Failed Pings Before Offline",
-                    "ping_interval": "Ping Interval"
+                    "ping_interval": "Ping Interval",
+                    "ping_method": "Ping Method"
                 },
                 "data_description": {
                     "ping_attempts_before_failure": "Number of consecutive failed pings before considering the device offline",
-                    "ping_interval": "Time between ping checks"
+                    "ping_interval": "Time between ping checks",
+                    "ping_method": "Select the ping method to use for monitoring"
                 }
             },
             "monitor_sensors": {
@@ -259,6 +263,12 @@
             "options": {
               "continue": "Continue to the Next Steps",
               "add_device": "Add Another Device"
+            }
+        },
+        "ping_method": {
+            "options": {
+                "icmp": "ICMP Ping (Standard)",
+                "arp": "ARP Ping (Local Subnet Only)"
             }
         },
         "ping_attempts_before_failure": {
