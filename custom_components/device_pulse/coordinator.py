@@ -58,11 +58,6 @@ class DevicePingCoordinator(DataUpdateCoordinator[PingResult]):
         self.failed_pings = 0
         self.failed_started_at = None
         self.last_response_time = None
-
-        self._logger = logging.LoggerAdapter(_LOGGER, {
-            "integration": self.integration.friendly_name,
-            "device": device_entry.name
-        })
         self._first_update = True
 
         super().__init__(
