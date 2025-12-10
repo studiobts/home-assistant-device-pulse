@@ -210,6 +210,10 @@ def is_device_valid_for_monitoring(
     if entry.domain == DOMAIN:
         return False
 
+    # Filter device by integration
+    if integration and entry.domain != integration.domain:
+        return False
+
     # Exclude devices connected through another device
     if device.via_device_id:
         # If the parent device's primary config entry is different from the current device's,
@@ -227,16 +231,6 @@ def is_device_valid_for_monitoring(
                 connected_device.name_by_user or connected_device.name,
             )
             return False
-
-    # Filter device by integration
-    if integration and entry.domain != integration.domain:
-        _LOGGER.debug(
-            "Device not valid: %s (config entry domain %s does not match %s)",
-            device_name,
-            entry.domain,
-            integration.domain,
-        )
-        return False
 
     return True
 
