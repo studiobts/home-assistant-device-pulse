@@ -3,14 +3,14 @@
     "step": {
       "user": {
         "title": "Device Pulse 设置",
-        "description": "**您希望如何设置监控？**\n\n- **使用现有集成**：监控您已配置的集成中的设备。\n- **创建设备组（手动）**：创建一个新的设备组并手动添加设备。",
+        "description": "**请选择监控配置方式：**\n\n- **使用现有集成**：监控您已配置的集成中的设备。\n- **创建设备组（手动）**：创建一个新的设备组并手动添加设备。",
         "data": {
           "entry_type": "配置模式"
         }
       },
       "integration_choice": {
         "title": "选择集成",
-        "description": "**请选择您要监控的集成。** 仅列出包含可监控设备的集成。",
+        "description": "**请选择您要监控的集成。** 仅列出包含有效设备信息的集成。",
         "data": {
           "integration": "集成"
         },
@@ -78,14 +78,14 @@
       },
       "monitor_parameters": {
         "title": "Ping 参数",
-        "description": "**设置通过 Ping 监控设备的规则。** 定义设备被判定离线之前所需的连续失败 Ping 次数，以及对设备进行 Ping 检查的频率。{arp_warning}",
+        "description": "**设置通过 Ping 监控设备的规则。** 定义设备被判定为离线前允许的连续 Ping 失败次数，以及对设备进行 Ping 检查的频率。{arp_warning}",
         "data": {
           "ping_attempts_before_failure": "连续失败次数",
           "ping_interval": "Ping 间隔",
           "ping_method": "Ping 方法"
         },
         "data_description": {
-          "ping_attempts_before_failure": "设备连续失败 Ping 的次数，在达到该次数时判定为离线。",
+          "ping_attempts_before_failure": "设备连续 Ping 失败多少次后被判定为离线。",
           "ping_interval": "两次 Ping 检查之间的时间间隔。",
           "ping_method": "用于监控设备连接状态的 Ping 方法。"
         }
@@ -101,7 +101,7 @@
         },
         "data_description": {
           "sensors_integration_summary_enabled": "为 {subject} 组创建摘要传感器，显示监控设备总数与离线设备数。",
-          "sensors_failed_pings_enabled": "为每个设备创建传感器，显示连续失败 Ping 的次数。",
+          "sensors_failed_pings_enabled": "为每个设备创建传感器，显示连续 Ping 失败的次数。",
           "sensors_disconnected_since_enabled": "创建记录设备离线时间的传感器。",
           "sensors_last_response_time_enabled": "创建显示最后一次成功 Ping 响应时间的传感器。"
         }
@@ -205,7 +205,7 @@
           "ping_method": "Ping 方法"
         },
         "data_description": {
-          "ping_attempts_before_failure": "设备被判定为离线之前所需的连续失败 Ping 次数。",
+          "ping_attempts_before_failure": "设备被判定为离线之前所需的连续 Ping 失败次数。",
           "ping_interval": "两次 Ping 检查之间的时间间隔。",
           "ping_method": "用于监控设备状态的 Ping 方法。"
         }
@@ -221,7 +221,7 @@
         },
         "data_description": {
           "sensors_integration_summary_enabled": "为 {subject} 组创建摘要传感器，显示设备总数与离线设备数。",
-          "sensors_failed_pings_enabled": "创建显示每个设备连续失败 Ping 次数的传感器。",
+          "sensors_failed_pings_enabled": "创建显示每个设备连续 Ping 失败次数的传感器。",
           "sensors_disconnected_since_enabled": "创建记录设备离线时间的传感器。",
           "sensors_last_response_time_enabled": "创建显示最后一次成功响应时间的传感器。"
         }
@@ -246,8 +246,8 @@
     "device_selection_mode": {
       "options": {
         "all": "所有设备 — 监控所有具有有效主机信息的设备",
-        "exclude": "排除部分设备 — 监控除您选择排除的设备以外的所有设备",
-        "include": "仅选择设备 — 仅监控您选择的设备"
+        "exclude": "排除模式 — 监控除选中设备外的所有设备",
+        "include": "包含模式 — 仅监控选中的设备"
       }
     },
     "entry_type": {
@@ -277,6 +277,11 @@
       }
     },
     "ping_attempts_before_failure": {
+      "unit_of_measurement": {
+        "seconds": "次"
+      }
+    },
+    "ping_interval": {
       "unit_of_measurement": {
         "seconds": "秒"
       }
