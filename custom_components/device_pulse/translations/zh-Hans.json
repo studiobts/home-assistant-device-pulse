@@ -61,8 +61,8 @@
           "group_device_host": "主机地址"
         },
         "data_description": {
-          "group_device_name": "设备在前端显示的友好名称。",
-          "group_device_host": "目标设备的主机名 (Hostname) 或 IP 地址。"
+          "group_device_name": "设备在前端显示的名称。",
+          "group_device_host": "目标设备的主机名 或 IP 地址。"
         }
       },
       "custom_group_add_device_or_continue": {
@@ -164,7 +164,7 @@
           "group_device_host": "主机地址"
         },
         "data_description": {
-          "group_device_name": "设备在前端显示的友好名称。",
+          "group_device_name": "设备在前端显示的名称。",
           "group_device_host": "目标设备的主机名或 IP 地址。"
         }
       },
