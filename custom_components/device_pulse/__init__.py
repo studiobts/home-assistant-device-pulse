@@ -100,7 +100,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the integration."""
     # Determine if privileged ICMP ping is available
     ping_icmp_privileged = await _can_use_icmp_lib_with_privilege()
-    _LOGGER.debug("Privileged ICMP ping available: %s", ping_icmp_privileged)
+    _LOGGER.info("Privileged ICMP ping available: %s", ping_icmp_privileged)
 
     # Check if arping is available for ARP ping support
     if ping_arp_available := await utils.is_arping_available(hass):
