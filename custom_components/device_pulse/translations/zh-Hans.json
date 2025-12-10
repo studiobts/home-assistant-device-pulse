@@ -2,257 +2,257 @@
   "config": {
     "step": {
       "user": {
-        "title": "Device Pulse 设置",
-        "description": "**请选择监控配置方式：**\n\n- **使用现有集成**：监控您已配置的集成中的设备。\n- **创建设备组（手动）**：创建一个新的设备组并手动添加设备。",
+        "title": "Device Pulse 配置向导",
+        "description": "**请选择监控配置模式：**\n\n- **使用现有集成**：从已配置的集成中自动导入设备。\n- **创建自定义设备组**：手动创建一个新的设备组并逐个添加设备。",
         "data": {
           "entry_type": "配置模式"
         }
       },
       "integration_choice": {
         "title": "选择集成",
-        "description": "**请选择您要监控的集成。** 仅列出包含有效设备信息的集成。",
+        "description": "**请选择数据来源集成。**\n列表中仅显示包含有效设备信息的集成。",
         "data": {
-          "integration": "集成"
+          "integration": "集成名称"
         },
         "data_description": {
-          "integration": "已找到 **{integration_count}** 个包含有效设备的集成。"
+          "integration": "已发现 **{integration_count}** 个包含可监控设备的集成。"
         }
       },
       "integration_device_selection_mode": {
-        "title": "设备选择模式",
-        "description": "请选择要监控来自 **{integration_name}** 的哪些设备。",
+        "title": "筛选策略",
+        "description": "请选择如何筛选来自 **{integration_name}** 的设备。",
         "data": {
-          "device_selection_mode": "设备选择模式"
+          "device_selection_mode": "筛选模式"
         }
       },
       "integration_select_excluded_devices": {
-        "title": "设备选择",
-        "description": "**请选择您不想监控的设备**（来自集成 **{integration_name}**）。其他有效设备将自动被监控。",
+        "title": "排除设备",
+        "description": "**请勾选需要排除的设备**（来自 **{integration_name}**）。\n\n未被勾选的有效设备将自动加入监控列表。",
         "data": {
-          "devices": "设备"
+          "devices": "选择设备"
         }
       },
       "integration_select_included_devices": {
-        "title": "设备选择",
-        "description": "**请选择您想监控的设备**（来自集成 **{integration_name}**）。仅监控您选定的这些设备。",
+        "title": "包含设备",
+        "description": "**请勾选需要监控的设备**（来自 **{integration_name}**）。\n\n仅勾选的设备会被加入监控列表。",
         "data": {
-          "devices": "设备"
+          "devices": "选择设备"
         }
       },
       "integration_summary": {
-        "title": "配置摘要",
-        "description": "**集成：** {integration_name}\n**设备：** {device_summary}\n\n**Ping 设置：**\n- 方法：{ping_method}\n- 连续失败次数：{ping_attempts_before_failure}\n- Ping 间隔：{ping_interval} 秒\n\n**传感器：** {sensors}\n\n⏱️ **离线检测时间：** 约 {detection_time}\n\n点击提交以完成配置。"
+        "title": "配置确认",
+        "description": "**集成来源：** {integration_name}\n**监控设备：** {device_summary}\n\n**Ping 策略：**\n- 方法：{ping_method}\n- 离线阈值：连续失败 {ping_attempts_before_failure} 次\n- 探测间隔：{ping_interval} 秒\n\n**启用传感器：**\n{sensors}\n\n⏱️ **离线判定耗时：** 约 {detection_time}\n\n确认无误后请点击提交。"
       },
       "custom_group_info": {
         "title": "创建设备组",
-        "description": "请输入一个名称，用于标识新的监控设备组。稍后将向此组添加设备。",
+        "description": "请为新的设备监控组命名。您将在下一步向此组添加设备。",
         "data": {
-          "group_name": "设备组名称"
+          "group_name": "组名称"
         },
         "data_description": {
-          "group_name": "用于识别此监控组的显示名称。"
+          "group_name": "用于在 Home Assistant 中识别此监控组的名称。"
         }
       },
       "custom_group_add_device": {
-        "title": "向组添加设备",
-        "description": "为此设备组添加设备。请指定设备名称和主机地址（主机名或 IP 地址）。",
+        "title": "添加设备",
+        "description": "请输入设备信息。主机地址支持域名或 IP 地址。",
         "data": {
           "group_device_name": "设备名称",
           "group_device_host": "主机地址"
         },
         "data_description": {
-          "group_device_name": "设备的显示名称。",
-          "group_device_host": "要监控的设备的主机名或 IP 地址。"
+          "group_device_name": "设备在前端显示的友好名称。",
+          "group_device_host": "目标设备的主机名 (Hostname) 或 IP 地址。"
         }
       },
       "custom_group_add_device_or_continue": {
-        "title": "添加新设备或继续",
-        "description": "请选择是继续添加设备，还是进入下一步。",
+        "title": "操作选择",
+        "description": "当前设备已保存。您希望继续添加下一个设备，还是完成配置？",
         "data": {
-          "group_add_device_or_continue": "操作"
+          "group_add_device_or_continue": "后续操作"
         }
       },
       "custom_group_summary": {
-        "title": "组摘要",
-        "description": "**组：** {group_name}\n**设备：**\n{group_devices_list}\n\n**Ping 设置：**\n- 方法：{ping_method}\n- 连续失败次数：{ping_attempts_before_failure}\n- Ping 间隔：{ping_interval} 秒\n\n**传感器：** {sensors}\n\n⏱️ **离线检测时间：** 约 {detection_time}\n\n点击提交以完成配置。"
+        "title": "配置确认",
+        "description": "**组名称：** {group_name}\n**设备列表：**\n{group_devices_list}\n\n**Ping 策略：**\n- 方法：{ping_method}\n- 离线阈值：连续失败 {ping_attempts_before_failure} 次\n- 探测间隔：{ping_interval} 秒\n\n**启用传感器：**\n{sensors}\n\n⏱️ **离线判定耗时：** 约 {detection_time}\n\n确认无误后请点击提交。"
       },
       "monitor_parameters": {
-        "title": "Ping 参数",
-        "description": "**设置通过 Ping 监控设备的规则。** 定义设备被判定为离线前允许的连续 Ping 失败次数，以及对设备进行 Ping 检查的频率。{arp_warning}",
+        "title": "Ping 策略配置",
+        "description": "**设定设备在线状态的检测规则。**\n请配置设备被判定为“离线”前允许的连续失败次数，以及 Ping 操作的频率。\n\n{arp_warning}",
         "data": {
-          "ping_attempts_before_failure": "连续失败次数",
+          "ping_attempts_before_failure": "离线判定阈值",
           "ping_interval": "Ping 间隔",
           "ping_method": "Ping 方法"
         },
         "data_description": {
-          "ping_attempts_before_failure": "设备连续 Ping 失败多少次后被判定为离线。",
-          "ping_interval": "两次 Ping 检查之间的时间间隔。",
-          "ping_method": "用于监控设备连接状态的 Ping 方法。"
+          "ping_attempts_before_failure": "连续 Ping 失败多少次后将设备标记为离线。",
+          "ping_interval": "两次 Ping 探测之间的时间间隔。",
+          "ping_method": "用于检测连接状态的底层协议。"
         }
       },
       "monitor_sensors": {
-        "title": "可选传感器配置",
-        "description": "您可以启用额外传感器，以获取更详细的监控信息。",
+        "title": "扩展传感器",
+        "description": "您可以启用额外的实体以获取更详细的监控数据。",
         "data": {
-          "sensors_integration_summary_enabled": "摘要传感器",
-          "sensors_failed_pings_enabled": "失败 Ping 计数传感器",
-          "sensors_disconnected_since_enabled": "离线时间戳传感器",
-          "sensors_last_response_time_enabled": "最后响应时间传感器"
+          "sensors_integration_summary_enabled": "组状态摘要",
+          "sensors_failed_pings_enabled": "失败次数统计",
+          "sensors_disconnected_since_enabled": "离线时刻记录",
+          "sensors_last_response_time_enabled": "响应时间记录"
         },
         "data_description": {
-          "sensors_integration_summary_enabled": "为 {subject} 组创建摘要传感器，显示监控设备总数与离线设备数。",
-          "sensors_failed_pings_enabled": "为每个设备创建传感器，显示连续 Ping 失败的次数。",
-          "sensors_disconnected_since_enabled": "创建记录设备离线时间的传感器。",
-          "sensors_last_response_time_enabled": "创建显示最后一次成功 Ping 响应时间的传感器。"
+          "sensors_integration_summary_enabled": "为 {subject} 创建摘要传感器，显示“总设备数”与“离线设备数”。",
+          "sensors_failed_pings_enabled": "为每个设备创建传感器，显示当前连续 Ping 失败的计数。",
+          "sensors_disconnected_since_enabled": "为每个设备创建传感器，记录设备变为离线状态的具体时间。",
+          "sensors_last_response_time_enabled": "为每个设备创建传感器，显示最后一次成功响应的耗时 (ms)。"
         }
       }
     },
     "error": {
       "no_integrations_selected": "请至少选择一个集成",
-      "select_at_least_one_device": "请至少选择一个设备",
-      "invalid_hostname_or_ip": "主机地址不是有效的主机名或 IP 地址",
+      "select_at_least_one_device": "请至少勾选一个设备",
+      "invalid_hostname_or_ip": "主机地址格式错误（需为有效的域名或 IP）",
       "unknown": "发生未知错误"
     },
     "abort": {
-      "already_configured": "该集成已被配置",
-      "no_supported_integrations": "未找到包含可监控设备的受支持集成",
-      "all_integrations_configured": "所有可用集成都已配置",
-      "selected_integration_not_found": "未找到所选集成",
-      "no_config_flow_available": "此配置条目不支持配置流程",
-      "unknown_config_entry_type": "未知配置条目类型"
+      "already_configured": "该集成已在配置列表中",
+      "no_supported_integrations": "未找到包含有效设备的受支持集成",
+      "all_integrations_configured": "所有可用集成均已配置完毕",
+      "selected_integration_not_found": "未找到指定的集成",
+      "no_config_flow_available": "此条目不支持配置流程",
+      "unknown_config_entry_type": "未知的配置条目类型"
     }
   },
   "options": {
     "step": {
       "integration_device_selection_mode": {
-        "title": "设备选择模式",
-        "description": "请选择要监控来自 **{integration_name}** 的哪些设备。",
+        "title": "筛选策略变更",
+        "description": "请选择如何筛选来自 **{integration_name}** 的设备。",
         "data": {
-          "device_selection_mode": "设备选择模式"
+          "device_selection_mode": "筛选模式"
         }
       },
       "integration_select_excluded_devices": {
-        "title": "设备选择",
-        "description": "**请选择要排除监控的设备**（来自集成 **{integration_name}**）。其他设备将继续被监控。",
+        "title": "排除设备",
+        "description": "**请勾选需要排除的设备**（来自 **{integration_name}**）。\n其他未勾选设备将继续保持监控。",
         "data": {
-          "devices": "设备"
+          "devices": "选择设备"
         }
       },
       "integration_select_included_devices": {
-        "title": "设备选择",
-        "description": "**请选择要监控的设备**。仅监控您选择的设备。",
+        "title": "包含设备",
+        "description": "**请勾选需要监控的设备**。\n仅勾选的设备会被纳入监控。",
         "data": {
-          "devices": "设备"
+          "devices": "选择设备"
         }
       },
       "integration_summary": {
-        "title": "配置摘要",
-        "description": "**集成：** {integration_name}\n**设备：** {device_summary}\n\n**Ping 设置：**\n- 方法：{ping_method}\n- 连续失败次数：{ping_attempts_before_failure}\n- Ping 间隔：{ping_interval} 秒\n\n**传感器：** {sensors}\n\n⏱️ **离线检测时间：** 约 {detection_time}\n\n点击提交以完成更新。"
+        "title": "更新确认",
+        "description": "**集成来源：** {integration_name}\n**监控设备：** {device_summary}\n\n**Ping 策略：**\n- 方法：{ping_method}\n- 离线阈值：连续失败 {ping_attempts_before_failure} 次\n- 探测间隔：{ping_interval} 秒\n\n**启用传感器：**\n{sensors}\n\n⏱️ **离线判定耗时：** 约 {detection_time}\n\n点击提交以应用更改。"
       },
       "custom_group_edit_action": {
         "title": "编辑设备组",
-        "description": "请选择要修改的内容。您可以管理设备或调整监控设置。",
+        "description": "请选择您要执行的操作。您可以管理设备列表或调整监控参数。",
         "data": {
-          "group_edit_action": "操作"
+          "group_edit_action": "操作类型"
         }
       },
       "custom_group_add_device": {
-        "title": "向组添加设备",
-        "description": "为设备组添加设备。主机地址必须是有效的主机名或 IP。",
+        "title": "添加新设备",
+        "description": "向当前组添加新设备。主机地址必须有效。",
         "data": {
           "group_device_name": "设备名称",
           "group_device_host": "主机地址"
         },
         "data_description": {
-          "group_device_name": "设备的显示名称。",
-          "group_device_host": "设备的主机名或 IP 地址。"
+          "group_device_name": "设备在前端显示的友好名称。",
+          "group_device_host": "目标设备的主机名或 IP 地址。"
         }
       },
       "custom_group_remove_devices": {
         "title": "移除设备",
-        "description": "请选择要从此组移除的设备。确认后，该设备将不再被监控。",
+        "description": "请勾选要从组中移除的设备。\n确认后，该设备将不再被监控。",
         "data": {
-          "devices": "要移除的设备"
+          "devices": "选择要移除的设备"
         }
       },
       "custom_group_update_device_selection": {
-        "title": "选择要编辑的设备",
-        "description": "请选择要编辑的设备，下一步将更改其设置。",
+        "title": "选择编辑对象",
+        "description": "请选择一个需要修改信息的设备。",
         "data": {
-          "device": "设备"
+          "device": "目标设备"
         }
       },
       "custom_group_update_device_data": {
-        "title": "编辑设备设置",
-        "description": "更新设备 **{device_name}** 的监控参数。",
+        "title": "修改设备参数",
+        "description": "正在更新设备 **{device_name}** 的信息。",
         "data": {
           "group_device_host": "主机地址"
         },
         "data_description": {
-          "group_device_host": "设备的主机名或 IP 地址。"
+          "group_device_host": "目标设备的主机名或 IP 地址。"
         }
       },
       "custom_group_summary": {
-        "title": "组摘要",
-        "description": "**组：** {group_name}\n**设备：**\n{group_devices_list}\n\n**Ping 设置：**\n- 方法：{ping_method}\n- 连续失败次数：{ping_attempts_before_failure}\n- Ping 间隔：{ping_interval} 秒\n\n**传感器：** {sensors}\n\n⏱️ **离线检测时间：** 约 {detection_time}\n\n点击提交以完成更新。"
+        "title": "更新确认",
+        "description": "**组名称：** {group_name}\n**设备列表：**\n{group_devices_list}\n\n**Ping 策略：**\n- 方法：{ping_method}\n- 离线阈值：连续失败 {ping_attempts_before_failure} 次\n- 探测间隔：{ping_interval} 秒\n\n**启用传感器：**\n{sensors}\n\n⏱️ **离线判定耗时：** 约 {detection_time}\n\n点击提交以应用更改。"
       },
       "monitor_parameters": {
-        "title": "Ping 参数",
-        "description": "定义基于 Ping 的监控规则，包括设备离线判定条件与检查频率。{arp_warning}",
+        "title": "Ping 策略配置",
+        "description": "更新 Ping 监控规则。修改将影响该组内的所有设备。\n{arp_warning}",
         "data": {
-          "ping_attempts_before_failure": "连续失败次数",
+          "ping_attempts_before_failure": "离线判定阈值",
           "ping_interval": "Ping 间隔",
           "ping_method": "Ping 方法"
         },
         "data_description": {
-          "ping_attempts_before_failure": "设备被判定为离线之前所需的连续 Ping 失败次数。",
-          "ping_interval": "两次 Ping 检查之间的时间间隔。",
-          "ping_method": "用于监控设备状态的 Ping 方法。"
+          "ping_attempts_before_failure": "连续 Ping 失败多少次后将设备标记为离线。",
+          "ping_interval": "两次 Ping 探测之间的时间间隔。",
+          "ping_method": "用于检测连接状态的底层协议。"
         }
       },
       "monitor_sensors": {
-        "title": "可选传感器配置",
-        "description": "请选择要启用的额外传感器以获取更多监控信息。",
+        "title": "扩展传感器",
+        "description": "请勾选您希望启用的额外监控传感器。",
         "data": {
-          "sensors_integration_summary_enabled": "摘要传感器",
-          "sensors_failed_pings_enabled": "失败 Ping 计数传感器",
-          "sensors_disconnected_since_enabled": "离线时间戳传感器",
-          "sensors_last_response_time_enabled": "最后响应时间传感器"
+          "sensors_integration_summary_enabled": "组状态摘要",
+          "sensors_failed_pings_enabled": "失败次数统计",
+          "sensors_disconnected_since_enabled": "离线时刻记录",
+          "sensors_last_response_time_enabled": "响应时间记录"
         },
         "data_description": {
-          "sensors_integration_summary_enabled": "为 {subject} 组创建摘要传感器，显示设备总数与离线设备数。",
-          "sensors_failed_pings_enabled": "创建显示每个设备连续 Ping 失败次数的传感器。",
-          "sensors_disconnected_since_enabled": "创建记录设备离线时间的传感器。",
-          "sensors_last_response_time_enabled": "创建显示最后一次成功响应时间的传感器。"
+          "sensors_integration_summary_enabled": "为 {subject} 创建摘要传感器，显示“总设备数”与“离线设备数”。",
+          "sensors_failed_pings_enabled": "为每个设备创建传感器，显示当前连续 Ping 失败的计数。",
+          "sensors_disconnected_since_enabled": "为每个设备创建传感器，记录设备变为离线状态的具体时间。",
+          "sensors_last_response_time_enabled": "为每个设备创建传感器，显示最后一次成功响应的耗时 (ms)。"
         }
       }
     },
     "error": {
       "no_integrations_selected": "请至少选择一个集成",
-      "select_at_least_one_device": "请至少选择一个设备",
-      "invalid_hostname_or_ip": "主机地址不是有效的主机名或 IP 地址",
+      "select_at_least_one_device": "请至少勾选一个设备",
+      "invalid_hostname_or_ip": "主机地址格式错误",
       "unknown": "发生未知错误"
     },
     "abort": {
-      "already_configured": "该集成已被配置",
-      "no_supported_integrations": "未找到包含可监控设备的受支持集成",
-      "all_integrations_configured": "所有可用集成都已配置",
+      "already_configured": "该集成已配置",
+      "no_supported_integrations": "未找到受支持集成",
+      "all_integrations_configured": "所有可用集成均已配置",
       "selected_integration_not_found": "未找到所选集成",
-      "no_config_flow_available": "此配置条目不支持配置流程",
-      "unknown_config_entry_type": "未知配置条目类型"
+      "no_config_flow_available": "不支持配置流程",
+      "unknown_config_entry_type": "未知类型"
     }
   },
   "selector": {
     "device_selection_mode": {
       "options": {
-        "all": "所有设备 — 监控所有具有有效主机信息的设备",
+        "all": "全量模式 — 监控所有有效设备",
         "exclude": "排除模式 — 监控除选中设备外的所有设备",
         "include": "包含模式 — 仅监控选中的设备"
       }
     },
     "entry_type": {
       "options": {
-        "custom_group": "创建设备组（手动）",
+        "custom_group": "创建自定义设备组",
         "integration": "使用现有集成"
       }
     },
@@ -260,20 +260,20 @@
       "options": {
         "group_edit_add_device": "添加新设备",
         "group_edit_remove_devices": "移除设备",
-        "group_edit_update_device": "更新设备",
-        "group_edit_change_settings": "更改组设置（Ping 和传感器）"
+        "group_edit_update_device": "更新设备信息",
+        "group_edit_change_settings": "更改全局设置（Ping 策略与传感器）"
       }
     },
     "group_add_device_or_continue": {
       "options": {
-        "continue": "继续",
-        "add_device": "添加新设备"
+        "continue": "完成配置",
+        "add_device": "继续添加下一个设备"
       }
     },
     "ping_method": {
       "options": {
-        "icmp": "ICMP Ping（标准）",
-        "arp": "ARP Ping（仅限局域网）"
+        "icmp": "ICMP Ping (标准模式)",
+        "arp": "ARP Ping (仅限局域网)"
       }
     },
     "ping_attempts_before_failure": {
