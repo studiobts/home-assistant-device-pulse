@@ -60,9 +60,16 @@ class DevicePingCoordinator(DataUpdateCoordinator[PingResult]):
         self.last_response_time = None
         self._first_update = True
 
+        # Remove unnecessary logs from inner coordinator methods
+        if _LOGGER.isEnabledFor(logging.DEBUG):
+            inner_logger = logging.getLogger(f"%s.inner" % __name__)
+            inner_logger.setLevel(logging.INFO)
+        else:
+            inner_logger = _LOGGER
+
         super().__init__(
             hass,
-            _LOGGER,
+            inner_logger,
             config_entry=config_entry,
             name=f"Ping {ping.ip_address}",
             update_interval=self._calculate_update_interval(),
