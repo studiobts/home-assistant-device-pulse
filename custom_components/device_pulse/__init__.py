@@ -272,10 +272,10 @@ async def async_setup_entry(
                     "CONNECTED" if coordinator.data.is_alive else "DISCONNECTED",
                 )
             else:
-                _LOGGER.warning("[%s]   Could not extract Host for device [%s]",device.name, integration.friendly_name)
+                _LOGGER.warning("[%s] Could not extract Host for device [%s]",integration.friendly_name, device.name)
 
         for disabled_device in disabled_devices:
-            _LOGGER.warning("[%s]   Keep device disabled [%s]", disabled_device.name, integration.friendly_name)
+            _LOGGER.warning("[%s] Keep device [%s] disabled", integration.friendly_name, disabled_device.name)
             device_registry.async_update_device(disabled_device.id, disabled_by=disabled_device.disabled_by)
 
     await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
