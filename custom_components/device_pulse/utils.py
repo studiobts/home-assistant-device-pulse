@@ -258,7 +258,7 @@ def is_valid_hostname_or_ip(value) -> bool:
 
     # Check hostname (RFC 1123)
     hostname_regex = re.compile(
-        r"^(?=.{1,253}$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*$"
+        r"^(?=.{1,253}$)(?!-)[A-Za-z0-9-]{1,63}(?<!-)(?:\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))*\.?$"
     )
     if hostname_regex.match(value):
         return True
