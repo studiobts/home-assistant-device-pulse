@@ -535,8 +535,11 @@ async def _entity_registry_updated(
             and not other_config_entry.disabled_by
             for entry_id in device_entry.config_entries
         ):
+            integrations = hass.data[DATA_CONFIG_KEY].integrations
+            integration = integrations.get(updated_entity_config_entry.domain)
             _LOGGER.info(
-                "Disabling device [%s] as no other config entries are enabled",
+                "[%s] Disabling device [%s] as no other config entries are enabled",
+                integration.friendly_name,
                 device_entry.name,
             )
             device_registry.async_update_device(
