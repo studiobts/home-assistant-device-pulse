@@ -6,6 +6,7 @@ from functools import partial
 import logging
 from typing import Any
 
+from homeassistant.config_entries import SIGNAL_CONFIG_ENTRY_CHANGED, ConfigEntryChange
 from homeassistant.components.ping import PingDataICMPLib, PingDataSubProcess, _can_use_icmp_lib_with_privilege
 from homeassistant.components import zeroconf
 from homeassistant.config_entries import ConfigEntry
@@ -14,6 +15,7 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import event
+from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.util.hass_dict import HassKey
 
@@ -124,9 +126,10 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         integrations
     )
 
-    # Register listeners for device and entity registry updates
+    # Register listener for config entry updates
+    async_dispatcher_connect(hass, SIGNAL_CONFIG_ENTRY_CHANGED, partial(_config_entry_updated, hass=hass))
+    # Register listeners for device registry updates
     hass.bus.async_listen(dr.EVENT_DEVICE_REGISTRY_UPDATED, partial(_device_registry_updated, hass=hass))
-    hass.bus.async_listen(er.EVENT_ENTITY_REGISTRY_UPDATED, partial(_entity_registry_updated, hass=hass))
     # Register listener for state changes of our entities
     event.async_track_state_change_filtered(
         hass, event.TrackStates(
@@ -281,6 +284,65 @@ async def async_setup_entry(
     await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
 
     return True
+
+
+async def _config_entry_updated(
+    change: ConfigEntryChange, updated_config_entry: ConfigEntry, hass: HomeAssistant
+) -> None:
+    """Handle updates to a config entry."""
+    monitored = hass.data[DATA_CONFIG_KEY].monitored
+
+    # Only disabled config entry updates are relevant
+    if change != ConfigEntryChange.UPDATED or updated_config_entry.disabled_by is None:
+        return
+    # If the updated config entry belongs to our config entries, nothing to do
+    if updated_config_entry.domain == DOMAIN:
+        return
+    # If the updated config entry does not belong to our monitored integration, nothing to do
+    if updated_config_entry.domain not in monitored.keys():
+        return
+
+    # Get our config entry involved
+    config_entry = hass.config_entries.async_get_entry(monitored[updated_config_entry.domain].config_entry_id)
+
+    # If config entry of our integration is still enabled,
+    # and there are no other config entries enabled associated to the devices,
+    # we have to disable these devices to remain in sync with the monitored integration.
+    if not config_entry.disabled_by:
+        device_registry = dr.async_get(hass)
+        # Get all devices related to the updated config entry
+        devices = dr.async_entries_for_config_entry(device_registry, updated_config_entry.entry_id)
+        if not devices:
+            _LOGGER.debug(
+                "No device entries found into registry for config entry [%s][%s]",
+            updated_config_entry.title,
+                updated_config_entry.entry_id
+            )
+            return
+
+        for device_entry in devices:
+            # Device primary config entry is not the updated config entry, nothing to do
+            if device_entry.primary_config_entry != updated_config_entry.entry_id:
+                return
+            # Now check if there are other config entries associated to the device that are enabled
+            # if not we have to disable the device
+            if not any(
+                entry_id not in [config_entry.entry_id, updated_config_entry.entry_id]
+                and (other_config_entry := hass.config_entries.async_get_entry(entry_id))
+                and not other_config_entry.disabled_by
+                for entry_id in device_entry.config_entries
+            ):
+                integrations = hass.data[DATA_CONFIG_KEY].integrations
+                integration = integrations.get(updated_config_entry.domain)
+                _LOGGER.info(
+                    "[%s] Disabling device [%s] as no other config entries are enabled",
+                    integration.friendly_name,
+                    device_entry.name,
+                )
+                device_registry.async_update_device(
+                    device_entry.id,
+                    disabled_by=dr.DeviceEntryDisabler.CONFIG_ENTRY,
+                )
 
 
 async def _device_registry_updated(
@@ -445,107 +507,6 @@ async def _device_registry_updated(
             _LOGGER.info("[%s] Config entry reloaded!", integration.friendly_name)
 
         config_entry.runtime_data.reload_task = hass.async_create_task(delayed_reload())
-
-
-async def _entity_registry_updated(
-    entity_event: Event, hass: HomeAssistant
-) -> None:
-    """Handle updates to the entity registry.
-
-    Once a config entry is disabled, it is disabled only if all config entries associated
-    to the device are disabled. Since we have attached our config entry to the device and the entry
-    is not disabled, the device remains enabled.
-    To handle this case, we have to listen to entity registry updates and check if the config entry
-    associated to the updated entity is disabled. If true, and after checking some conditions,
-    we have to disable the device.
-    """
-    monitored = hass.data[DATA_CONFIG_KEY].monitored
-    entity_id = entity_event.data.get("entity_id")
-
-    # Only events related to disabled_by changes are relevant
-    if (
-        not entity_id
-        or entity_event.data.get("action") != "update"
-        # The updated is not related to a disabled_by change
-        or not event_changes_has_key(entity_event, "disabled_by")
-        # The entity has been enabled
-        or entity_event.data.get("changes").get("disabled_by") is not None
-    ):
-        return
-
-    entity_registry = er.async_get(hass)
-    updated_entity = entity_registry.async_get(entity_id)
-    if not updated_entity:
-        _LOGGER.debug("No entity entry found into registry with id [%s]", entity_id)
-        return
-    if not updated_entity.config_entry_id:
-        _LOGGER.debug("No config_entry_id found for entity entry [%s]", entity_id)
-        return
-    # If the updated entity belongs to our config entries, nothing to do
-    if updated_entity.config_entry_id in [
-        monitored_integration.config_entry_id
-        for monitored_integration in monitored.values()
-    ]:
-        return
-
-    # Get config entry for the updated entity
-    updated_entity_config_entry = hass.config_entries.async_get_entry(
-        updated_entity.config_entry_id
-    )
-
-    if not updated_entity_config_entry:
-        _LOGGER.debug("No config entry found for entity entry [%s]", entity_id)
-        return
-
-    # If config entry associated to the updated entity does not belong to our
-    # monitored integration or the updated entity is not associated to any device,
-    # nothing to do
-    if (
-        updated_entity_config_entry.domain not in monitored.keys()
-        or not updated_entity.device_id
-    ):
-        return
-
-    # Get our config entry involved
-    config_entry = hass.config_entries.async_get_entry(monitored[updated_entity_config_entry.domain].config_entry_id)
-
-    # If config entry associated to the updated entity is disabled and config entry of
-    # our integration is still enabled, we have to check if the device associated with the
-    # updated entity has as primary config entry the updated entity config entry and
-    # his platform is the monitored integration.
-    # If true, and there are no other config entries associated to the device that are
-    # enabled, we have to disable the device.
-    if updated_entity_config_entry.disabled_by and not config_entry.disabled_by:
-        device_registry = dr.async_get(hass)
-        device_entry = device_registry.async_get(updated_entity.device_id)
-        if not device_entry:
-            _LOGGER.debug(
-                "No device entry found into registry with id [%s]",
-                updated_entity.device_id,
-            )
-            return
-        # Device primary config entry is not the updated entity config entry, nothing to do
-        if device_entry.primary_config_entry != updated_entity.config_entry_id:
-            return
-        # Now check if there are other config entries associated to the device that are enabled
-        # if not we have to disable the device
-        if not any(
-            entry_id not in [config_entry.entry_id, updated_entity.config_entry_id]
-            and (other_config_entry := hass.config_entries.async_get_entry(entry_id))
-            and not other_config_entry.disabled_by
-            for entry_id in device_entry.config_entries
-        ):
-            integrations = hass.data[DATA_CONFIG_KEY].integrations
-            integration = integrations.get(updated_entity_config_entry.domain)
-            _LOGGER.info(
-                "[%s] Disabling device [%s] as no other config entries are enabled",
-                integration.friendly_name,
-                device_entry.name,
-            )
-            device_registry.async_update_device(
-                device_entry.id,
-                disabled_by=dr.DeviceEntryDisabler.CONFIG_ENTRY,
-            )
 
 
 async def _state_changed(
