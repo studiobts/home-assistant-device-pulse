@@ -2,6 +2,7 @@
 
 import abc
 import copy
+import logging
 from typing import Any, Protocol, runtime_checkable
 
 import voluptuous as vol
@@ -64,6 +65,8 @@ GROUP_EDIT_ADD_DEVICE = "group_edit_add_device"
 GROUP_EDIT_REMOVE_DEVICES = "group_edit_remove_devices"
 GROUP_EDIT_UPDATE_DEVICE = "group_edit_update_device"
 GROUP_EDIT_CHANGE_SETTING = "group_edit_change_settings"
+
+_LOGGER = logging.getLogger(__name__)
 
 @runtime_checkable
 class _FlowProtocol(Protocol):
@@ -661,6 +664,10 @@ class DevicePingMonitorConfigFlow(
 
         zc = await zeroconf.async_get_instance(self.hass)
         self.available_integrations = await get_valid_integrations_for_monitoring(self.hass, zc)
+        _LOGGER.info("Step Integration Choice: Found %d valid integrations for monitoring: %s",
+            len(self.available_integrations),
+            [integration.friendly_name for integration in self.available_integrations.values()]
+        )
 
         if not self.available_integrations:
             return self.async_abort(reason="no_supported_integrations")
@@ -800,6 +807,10 @@ class DevicePingMonitorOptionsFlow(
         if self.entry_type == ENTRY_TYPE_INTEGRATION:
             zc = await zeroconf.async_get_instance(self.hass)
             self.available_integrations = await get_valid_integrations_for_monitoring(self.hass, zc)
+            _LOGGER.info("Step Init: Found %d valid integrations for monitoring: %s",
+            len(self.available_integrations),
+                [integration.friendly_name for integration in self.available_integrations.values()]
+            )
             self.integration_selected = self.available_integrations.get(self.config_entry.data.get(CONF_INTEGRATION))
             self.integration_device_selection_mode = self.config_entry.options.get(CONF_DEVICE_SELECTION_MODE, DEVICE_SELECTION_ALL)
             self.integration_selected_devices = copy.deepcopy(self.config_entry.options.get(CONF_SELECTED_DEVICES, []))

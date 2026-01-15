@@ -167,6 +167,10 @@ async def async_setup_entry(
             # If domain is not into cached integrations list, update it
             if not domain in hass.data[DATA_CONFIG_KEY].integrations:
                 hass.data[DATA_CONFIG_KEY].integrations = await utils.get_valid_integrations_for_monitoring(hass, zc)
+                _LOGGER.info("Update cache: found %d valid integrations for monitoring: %s",
+                    len(hass.data[DATA_CONFIG_KEY].integrations),
+                    [integration.friendly_name for integration in hass.data[DATA_CONFIG_KEY].integrations.values()]
+                )
             # Get integration data
             integration = hass.data[DATA_CONFIG_KEY].integrations[domain]
 
