@@ -23,6 +23,10 @@ from .const import (
     CONF_GROUP_DEVICES_LIST,
     CONF_GROUP_DEVICE_ID,
     CONF_GROUP_DEVICE_HOST,
+    HOST_SOURCE_MANUAL_ENTRY,
+    HOST_SOURCE_CUSTOM_RESOLVER,
+    HOST_SOURCE_CONFIG_ENTRY,
+    HOST_SOURCE_ZEROCONF,
 )
 from .host_resolvers import resolve as resolve_host
 
@@ -58,14 +62,14 @@ async def get_valid_integrations_for_monitoring(hass: HomeAssistant) -> dict[str
         # Get the primary config entry for the device
         device_config_entry = hass.config_entries.async_get_entry(device.primary_config_entry)
         # Check if the configuration contains a valid Host parameter
-        has_host = await extract_device_host(hass, device, zc, device_config_entry) is not None
+        host, _ = await extract_device_host(hass, device, zc, device_config_entry)
 
-        if has_host and device_config_entry.domain not in integrations:
+        if host and device_config_entry.domain not in integrations:
             # Get the friendly name of the integration
             friendly_name = await _get_integration_name(device_config_entry.domain)
             integrations[device_config_entry.domain] = IntegrationData(device_config_entry.domain, friendly_name, 0, False)
 
-        if has_host:
+        if host:
             # Increment the device count for the integration
             integrations[device_config_entry.domain].device_count += 1
 
@@ -267,7 +271,7 @@ def is_valid_hostname_or_ip(value) -> bool:
 
 async def extract_device_host(
     hass: HomeAssistant, device: dr.DeviceEntry, zc: zeroconf.models.HaZeroconf, device_config_entry: ConfigEntry | None = None
-) -> str | None:
+) -> tuple[str | None, str | None]:
     """Extract Host for device based on integration type."""
     # Get the primary config entry for the device
     device_config_entry = device_config_entry or hass.config_entries.async_get_entry(
@@ -275,34 +279,40 @@ async def extract_device_host(
     )
 
     host = None
+    source = None
 
     if device_config_entry.data.get(CONF_ENTRY_TYPE) == ENTRY_TYPE_CUSTOM_GROUP:
         group_devices = device_config_entry.options.get(CONF_GROUP_DEVICES_LIST)
         for group_device in group_devices:
             if next(iter(device.identifiers))[1] == group_device.get(CONF_GROUP_DEVICE_ID):
                 host = group_device.get(CONF_GROUP_DEVICE_HOST)
+                source = HOST_SOURCE_MANUAL_ENTRY
                 break
     # Check if there is a Host Resolver for the integration
     elif host := await resolve_host(device_config_entry, device):
+        source = HOST_SOURCE_CUSTOM_RESOLVER
         _LOGGER.debug("Found Host '%s' with host resolver for device %s", host, device.name)
     else:
         for param_name in HOST_PARAM_NAMES:
             if param_name in device_config_entry.data:
                 host = device_config_entry.data[param_name]
+                source = HOST_SOURCE_CONFIG_ENTRY
                 _LOGGER.debug("Found Host '%s' in data parameter '%s' for device %s",host, param_name, device.name)
                 break
             if param_name in device_config_entry.options:
                 host = device_config_entry.options[param_name]
+                source = HOST_SOURCE_CONFIG_ENTRY
                 _LOGGER.debug("Found Host '%s' in options parameter '%s' for device %s",host, param_name, device.name)
                 break
 
     # Last chance, check if device was added through zeroconf and query it
     if not host and device_config_entry.source == SOURCE_ZEROCONF:
         if host := await _async_get_host_from_zeroconf(zc, device_config_entry):
+            source = HOST_SOURCE_ZEROCONF
             _LOGGER.debug("Found Host '%s' from zeroconf for device %s", host, device.name)
 
     # Validate the host value
-    return host if host and is_valid_hostname_or_ip(host) else None
+    return (host, source) if host and is_valid_hostname_or_ip(host) else (None, None)
 
 def format_duration(seconds: float) -> str:
     """Convert a duration in seconds into a human-readable string (%d %h %m %s)."""
@@ -441,7 +451,7 @@ async def check_devices_support_arp_ping(
 
     # Then check if any device is in the local subnet
     for device in devices:
-        host = await extract_device_host(hass, device, zc)
+        host, _ = await extract_device_host(hass, device, zc)
         if host and await is_host_in_local_subnet(hass, host):
             return True, None
 

@@ -45,6 +45,7 @@ class DevicePingCoordinator(DataUpdateCoordinator[PingResult]):
         config_entry: ConfigEntry,
         integration: IntegrationData,
         device_entry: DeviceEntry,
+        host_source: str,
         ping: PingDataICMPLib | PingDataSubProcess | PingDataARP,
         ping_attempts_before_failure: int = DEFAULT_PING_ATTEMPTS_BEFORE_FAILURE,
         ping_interval: int = DEFAULT_PING_INTERVAL,
@@ -52,6 +53,7 @@ class DevicePingCoordinator(DataUpdateCoordinator[PingResult]):
         """Initialize the coordinator."""
         self.integration: IntegrationData = integration
         self.device_entry: DeviceEntry = device_entry
+        self.host_source: str = host_source
         self.ping = ping
         self.ping_interval = ping_interval * 1000  # Convert to milliseconds
         self.ping_attempts_before_failure = ping_attempts_before_failure

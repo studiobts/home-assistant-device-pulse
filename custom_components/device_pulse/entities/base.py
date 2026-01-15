@@ -11,7 +11,8 @@ from custom_components.device_pulse.const import (
     ENTITY_ATTR_INTEGRATION_CUSTOM_GROUP,
     ENTITY_ATTR_DEVICE_ID,
     ENTITY_ATTR_TAG,
-    ENTITY_ATTR_HOST
+    ENTITY_ATTR_HOST,
+    ENTITY_ATTR_HOST_SOURCE,
 )
 from custom_components.device_pulse.utils import IntegrationData
 
@@ -29,6 +30,7 @@ class BaseCoordinatorEntity(CoordinatorEntity[DevicePingCoordinator], abc.ABC):
         ENTITY_ATTR_INTEGRATION_CUSTOM_GROUP,
         ENTITY_ATTR_DEVICE_ID,
         ENTITY_ATTR_HOST,
+        ENTITY_ATTR_HOST_SOURCE,
         ENTITY_ATTR_TAG
     })
 
@@ -85,6 +87,7 @@ class BaseCoordinatorEntity(CoordinatorEntity[DevicePingCoordinator], abc.ABC):
             ENTITY_ATTR_INTEGRATION_CUSTOM_GROUP: self._integration.custom_group,
             ENTITY_ATTR_DEVICE_ID: self.device_entry.id,
             ENTITY_ATTR_HOST: self.coordinator.ping.ip_address,
+            ENTITY_ATTR_HOST_SOURCE: self.coordinator.host_source,
             ENTITY_ATTR_TAG: self._tag,
         }
 

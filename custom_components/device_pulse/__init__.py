@@ -233,7 +233,7 @@ async def async_setup_entry(
 
         for device in devices:
             # Extract host for the device
-            host = await utils.extract_device_host(hass, device, zc)
+            host, host_source = await utils.extract_device_host(hass, device, zc)
 
             if host:
                 if device.disabled:
@@ -259,6 +259,7 @@ async def async_setup_entry(
                     config_entry,
                     integration,
                     device,
+                    host_source,
                     ping_instance,
                     ping_attempts_before_failure,
                     ping_interval
