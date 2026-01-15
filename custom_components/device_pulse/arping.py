@@ -9,6 +9,7 @@ from typing import Any
 from homeassistant.components.network import Adapter
 from homeassistant.core import HomeAssistant
 
+from .const import ARP_TIMEOUT
 from .utils import get_network_adapter_for_ip
 
 _LOGGER = logging.getLogger(__name__)
@@ -34,7 +35,7 @@ class PingDataARP:
         # -c: count,
         # -w: timeout in seconds
         # -I: interface
-        cmd = ["arping", "-c", str(self.count), "-w", "1", "-I", self._adapter.get("name"), self.ip_address]
+        cmd = ["arping", "-c", str(self.count), "-w", str(ARP_TIMEOUT), "-I", self._adapter.get("name"), self.ip_address]
 
         try:
             process = await asyncio.create_subprocess_exec(
@@ -43,7 +44,7 @@ class PingDataARP:
                 stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await asyncio.wait_for(
-                process.communicate(), timeout=5
+                process.communicate(), timeout=(ARP_TIMEOUT * 3)
             )
 
             # arping returns 0 if at least one response was received

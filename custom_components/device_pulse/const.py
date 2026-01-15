@@ -12,12 +12,15 @@ ENTRY_TYPE_CUSTOM_GROUP = "custom_group"
 PING_METHOD_ICMP = "icmp"
 PING_METHOD_ARP = "arp"
 
+ARP_TIMEOUT = 1
+
 CONF_ENTRY_TYPE = "entry_type"
 # Entry Type Integration specific fields and defaults
 CONF_INTEGRATION = "integration"
 CONF_DEVICE_SELECTION_MODE = "device_selection_mode"
 CONF_SELECTED_DEVICES = "selected_devices"
 CONF_PING_ATTEMPTS_BEFORE_FAILURE = "ping_attempts_before_failure"
+CONF_PING_REQUESTS_PER_ATTEMPT = "ping_requests_per_attempt"
 CONF_PING_INTERVAL = "ping_interval"
 CONF_SENSORS_INTEGRATION_SUMMARY_ENABLED = "sensors_integration_summary_enabled"
 CONF_SENSORS_FAILED_PINGS_ENABLED = "sensors_failed_pings_enabled"
@@ -26,6 +29,7 @@ CONF_SENSORS_LAST_RESPONSE_TIME_ENABLED = "sensors_last_response_time_enabled"
 CONF_PING_METHOD = "ping_method"
 
 DEFAULT_PING_ATTEMPTS_BEFORE_FAILURE = 3
+DEFAULT_PING_REQUESTS_PER_ATTEMPT = 1
 DEFAULT_PING_INTERVAL = 60
 DEFAULT_SENSORS_INTEGRATION_SUMMARY_ENABLED = False
 DEFAULT_SENSORS_FAILED_PINGS_ENABLED = False

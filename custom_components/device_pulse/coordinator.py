@@ -15,6 +15,7 @@ from homeassistant.util import dt as dt_util
 
 from .const import (
     DEFAULT_PING_ATTEMPTS_BEFORE_FAILURE,
+    DEFAULT_PING_REQUESTS_PER_ATTEMPT,
     DEFAULT_PING_INTERVAL,
     EVENT_DEVICE_CAME_ONLINE,
     EVENT_DEVICE_WENT_OFFLINE,
@@ -48,6 +49,7 @@ class DevicePingCoordinator(DataUpdateCoordinator[PingResult]):
         host_source: str,
         ping: PingDataICMPLib | PingDataSubProcess | PingDataARP,
         ping_attempts_before_failure: int = DEFAULT_PING_ATTEMPTS_BEFORE_FAILURE,
+        ping_requests_per_attempt: int = DEFAULT_PING_REQUESTS_PER_ATTEMPT,
         ping_interval: int = DEFAULT_PING_INTERVAL,
     ) -> None:
         """Initialize the coordinator."""
@@ -57,6 +59,7 @@ class DevicePingCoordinator(DataUpdateCoordinator[PingResult]):
         self.ping = ping
         self.ping_interval = ping_interval * 1000  # Convert to milliseconds
         self.ping_attempts_before_failure = ping_attempts_before_failure
+        self.ping_requests_per_attempt = ping_requests_per_attempt
         self.failed_pings = 0
         self.failed_started_at = None
         self.last_response_time = None
@@ -110,7 +113,7 @@ class DevicePingCoordinator(DataUpdateCoordinator[PingResult]):
             self.failed_pings = 0
             self.failed_started_at = None
             self.last_response_time = (
-                self.ping.data.get("avg") if self.ping.data else None
+                round(self.ping.data.get("avg"), 3) if self.ping.data else None
             )
             _LOGGER.debug(
                 "[%s] Device [%s][%s] ping successful, response time: %sms",

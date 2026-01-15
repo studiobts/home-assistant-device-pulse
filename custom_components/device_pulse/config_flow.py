@@ -19,6 +19,7 @@ from .const import (
     CONF_ENTRY_TYPE,
     CONF_INTEGRATION,
     CONF_PING_ATTEMPTS_BEFORE_FAILURE,
+    CONF_PING_REQUESTS_PER_ATTEMPT,
     CONF_PING_INTERVAL,
     CONF_PING_METHOD,
     CONF_SELECTED_DEVICES,
@@ -33,6 +34,7 @@ from .const import (
     CONF_GROUP_DEVICE_NAME,
     CONF_GROUP_DEVICE_HOST,
     DEFAULT_PING_ATTEMPTS_BEFORE_FAILURE,
+    DEFAULT_PING_REQUESTS_PER_ATTEMPT,
     DEFAULT_PING_INTERVAL,
     DEFAULT_PING_METHOD,
     DEFAULT_SENSORS_INTEGRATION_SUMMARY_ENABLED,
@@ -101,6 +103,7 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
     custom_group_edit_update_device_id = None
 
     ping_attempts_before_failure: int = DEFAULT_PING_ATTEMPTS_BEFORE_FAILURE
+    ping_requests_per_attempt: int = DEFAULT_PING_REQUESTS_PER_ATTEMPT
     ping_interval: int = DEFAULT_PING_INTERVAL
     ping_method: str = DEFAULT_PING_METHOD
     sensors_integration_summary_enabled = DEFAULT_SENSORS_INTEGRATION_SUMMARY_ENABLED
@@ -114,6 +117,7 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
 
         if user_input is not None:
             self.ping_attempts_before_failure = int(user_input[CONF_PING_ATTEMPTS_BEFORE_FAILURE])
+            self.ping_requests_per_attempt = int(user_input[CONF_PING_REQUESTS_PER_ATTEMPT])
             self.ping_interval = int(user_input[CONF_PING_INTERVAL])
             self.ping_method = user_input[CONF_PING_METHOD]
 
@@ -167,6 +171,17 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
                 ): selector.NumberSelector(
                     selector.NumberSelectorConfig(
                         min=1,
+                        max=100,
+                        step=1,
+                        mode=selector.NumberSelectorMode.BOX,
+                    )
+                ),
+                vol.Required(
+                    CONF_PING_REQUESTS_PER_ATTEMPT,
+                    default=self.ping_requests_per_attempt,
+                ): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=1,
                         max=10,
                         step=1,
                         mode=selector.NumberSelectorMode.BOX,
@@ -176,9 +191,9 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
                     CONF_PING_INTERVAL, default=self.ping_interval
                 ): selector.NumberSelector(
                     selector.NumberSelectorConfig(
-                        min=10,
+                        min=5,
                         max=600,
-                        step=10,
+                        step=5,
                         mode=selector.NumberSelectorMode.BOX,
                         unit_of_measurement="seconds",
                     )
@@ -455,6 +470,7 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
                 "integration_name": self.integration_selected.friendly_name,
                 "device_summary": device_summary,
                 "ping_attempts_before_failure": str(self.ping_attempts_before_failure),
+                "ping_requests_per_attempt": str(self.ping_requests_per_attempt),
                 "ping_interval": str(self.ping_interval),
                 "ping_method": ping_method_label,
                 "sensors": sensors_summary,
@@ -591,6 +607,7 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
                 "group_name": self.custom_group_name,
                 "group_devices_list": group_devices_list,
                 "ping_attempts_before_failure": str(self.ping_attempts_before_failure),
+                "ping_requests_per_attempt": str(self.ping_requests_per_attempt),
                 "ping_interval": str(self.ping_interval),
                 "ping_method": ping_method_label,
                 "sensors": sensors_summary,
@@ -736,6 +753,7 @@ class DevicePingMonitorConfigFlow(
                 if self.integration_device_selection_mode != DEVICE_SELECTION_ALL
                 else [],
                 CONF_PING_ATTEMPTS_BEFORE_FAILURE: self.ping_attempts_before_failure,
+                CONF_PING_REQUESTS_PER_ATTEMPT: self.ping_requests_per_attempt,
                 CONF_PING_INTERVAL: self.ping_interval,
                 CONF_PING_METHOD: self.ping_method,
                 CONF_DEVICE_SELECTION_MODE: self.integration_device_selection_mode,
@@ -757,6 +775,7 @@ class DevicePingMonitorConfigFlow(
                 CONF_GROUP_NAME: self.custom_group_name,
                 CONF_GROUP_DEVICES_LIST: self.custom_group_devices,
                 CONF_PING_ATTEMPTS_BEFORE_FAILURE: self.ping_attempts_before_failure,
+                CONF_PING_REQUESTS_PER_ATTEMPT: self.ping_requests_per_attempt,
                 CONF_PING_INTERVAL: self.ping_interval,
                 CONF_PING_METHOD: self.ping_method,
                 CONF_SENSORS_INTEGRATION_SUMMARY_ENABLED: self.sensors_integration_summary_enabled,
@@ -783,6 +802,7 @@ class DevicePingMonitorOptionsFlow(
         self.entry_type = self.config_entry.data.get(CONF_ENTRY_TYPE)
 
         self.ping_attempts_before_failure = self.config_entry.options.get(CONF_PING_ATTEMPTS_BEFORE_FAILURE, DEFAULT_PING_ATTEMPTS_BEFORE_FAILURE)
+        self.ping_requests_per_attempt = self.config_entry.options.get(CONF_PING_REQUESTS_PER_ATTEMPT, DEFAULT_PING_REQUESTS_PER_ATTEMPT)
         self.ping_interval = self.config_entry.options.get(CONF_PING_INTERVAL, DEFAULT_PING_INTERVAL)
         self.ping_method = self.config_entry.options.get(CONF_PING_METHOD, DEFAULT_PING_METHOD)
         self.sensors_integration_summary_enabled = self.config_entry.options.get(CONF_SENSORS_INTEGRATION_SUMMARY_ENABLED, DEFAULT_SENSORS_INTEGRATION_SUMMARY_ENABLED)
@@ -984,6 +1004,7 @@ class DevicePingMonitorOptionsFlow(
                 else [],
                 # Common entry data
                 CONF_PING_ATTEMPTS_BEFORE_FAILURE: self.ping_attempts_before_failure,
+                CONF_PING_REQUESTS_PER_ATTEMPT: self.ping_requests_per_attempt,
                 CONF_PING_INTERVAL: self.ping_interval,
                 CONF_PING_METHOD: self.ping_method,
                 CONF_SENSORS_INTEGRATION_SUMMARY_ENABLED: self.sensors_integration_summary_enabled,
@@ -1001,6 +1022,7 @@ class DevicePingMonitorOptionsFlow(
                 CONF_GROUP_DEVICES_LIST: self.custom_group_devices,
                 # Common entry data
                 CONF_PING_ATTEMPTS_BEFORE_FAILURE: self.ping_attempts_before_failure,
+                CONF_PING_REQUESTS_PER_ATTEMPT: self.ping_requests_per_attempt,
                 CONF_PING_INTERVAL: self.ping_interval,
                 CONF_PING_METHOD: self.ping_method,
                 CONF_SENSORS_INTEGRATION_SUMMARY_ENABLED: self.sensors_integration_summary_enabled,

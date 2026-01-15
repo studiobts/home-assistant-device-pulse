@@ -41,7 +41,7 @@
             },
             "integration_summary": {
                 "title": "Configuration Summary",
-                "description": "**Integration:** {integration_name}\n**Devices:** {device_summary}\n**Ping Settings:**\n- Method: {ping_method}\n- Failed Pings Before Offline: {ping_attempts_before_failure}\n- Ping Interval: {ping_interval} seconds\n\n**Sensors:** {sensors}\n\n⏱️ **Offline Detection Time:** about {detection_time}\n\nPress Submit to complete the configuration."
+                "description": "**Integration:** {integration_name}\n**Devices:** {device_summary}\n**Ping Settings:**\n- Method: {ping_method}\n- Failed Pings Before Offline: {ping_attempts_before_failure}\n- Ping Requests Per Attempt: {ping_requests_per_attempt}\n- Ping Interval: {ping_interval} seconds\n\n**Sensors:** {sensors}\n\n⏱️ **Offline Detection Time:** about {detection_time}\n\nPress Submit to complete the configuration."
             },
             "custom_group_info": {
                 "title": "Create Devices Group",
@@ -74,18 +74,20 @@
             },
             "custom_group_summary": {
                 "title": "Group Summary",
-                "description": "**Group:** {group_name}\n**Devices:**\n{group_devices_list}\n\n**Ping Settings:**\n- Method: {ping_method}\n- Failed Pings Before Offline: {ping_attempts_before_failure}\n- Ping Interval: {ping_interval} seconds\n\n**Sensors:** {sensors}\n\n⏱️ **Offline Detection Time:** about {detection_time}\n\nPress Submit to complete the configuration."
+                "description": "**Group:** {group_name}\n**Devices:**\n{group_devices_list}\n\n**Ping Settings:**\n- Method: {ping_method}\n- Failed Pings Before Offline: {ping_attempts_before_failure}\n- Ping Requests Per Attempt: {ping_requests_per_attempt}\n- Ping Interval: {ping_interval} seconds\n\n**Sensors:** {sensors}\n\n⏱️ **Offline Detection Time:** about {detection_time}\n\nPress Submit to complete the configuration."
             },
             "monitor_parameters": {
                 "title": "Ping Parameters",
                 "description": "**Set the rules for how devices are monitored through ping.** Define how many failed pings are needed before a device is considered offline, and how often each device should be pinged.{arp_warning}",
                 "data": {
                     "ping_attempts_before_failure": "Failed Pings Before Offline",
+                    "ping_requests_per_attempt": "Ping Requests Per Attempt",
                     "ping_interval": "Ping Interval",
                     "ping_method": "Ping Method"
                 },
                 "data_description": {
                     "ping_attempts_before_failure": "Number of consecutive failed pings before considering the device offline",
+                    "ping_requests_per_attempt": "Number of ping packets sent for each reachability check attempt",
                     "ping_interval": "Time between ping checks",
                     "ping_method": "Select the ping method to use for monitoring"
                 }
@@ -147,7 +149,7 @@
             },
             "integration_summary": {
                 "title": "Configuration Summary",
-                "description": "**Integration:** {integration_name}\n**Devices:** {device_summary}\n**Ping Settings:**\n- Method: {ping_method}\n- Failed Pings Before Offline: {ping_attempts_before_failure}\n- Ping Interval: {ping_interval} seconds\n\n**Sensors:** {sensors}\n\n⏱️ **Offline Detection Time:** about {detection_time}\n\nPress Submit to complete the configuration."
+                "description": "**Integration:** {integration_name}\n**Devices:** {device_summary}\n**Ping Settings:**\n- Method: {ping_method}\n- Failed Pings Before Offline: {ping_attempts_before_failure}\n- Ping Requests Per Attempt: {ping_requests_per_attempt}\n- Ping Interval: {ping_interval} seconds\n\n**Sensors:** {sensors}\n\n⏱️ **Offline Detection Time:** about {detection_time}\n\nPress Submit to complete the configuration."
             },
             "custom_group_edit_action": {
                 "title": "Edit Devices Group",
@@ -194,18 +196,20 @@
             },
             "custom_group_summary": {
                 "title": "Group Summary",
-                "description": "**Group:** {group_name}\n**Devices:**\n{group_devices_list}\n\n**Ping Settings:**\n- Method: {ping_method}\n- Failed Pings Before Offline: {ping_attempts_before_failure}\n- Ping Interval: {ping_interval} seconds\n\n**Sensors:** {sensors}\n\n⏱️ **Offline Detection Time:** about {detection_time}\n\nPress Submit to complete the configuration."
+                "description": "**Group:** {group_name}\n**Devices:**\n{group_devices_list}\n\n**Ping Settings:**\n- Method: {ping_method}\n- Failed Pings Before Offline: {ping_attempts_before_failure}\n- Ping Requests Per Attempt: {ping_requests_per_attempt}\n- Ping Interval: {ping_interval} seconds\n\n**Sensors:** {sensors}\n\n⏱️ **Offline Detection Time:** about {detection_time}\n\nPress Submit to complete the configuration."
             },
             "monitor_parameters": {
                 "title": "Ping Parameters",
                 "description": "**Set the rules for how devices are monitored through ping.** Define how many failed pings are needed before a device is considered offline, and how often each device should be pinged.{arp_warning}",
                 "data": {
                     "ping_attempts_before_failure": "Failed Pings Before Offline",
+                    "ping_requests_per_attempt": "Ping Requests Per Attempt",
                     "ping_interval": "Ping Interval",
                     "ping_method": "Ping Method"
                 },
                 "data_description": {
                     "ping_attempts_before_failure": "Number of consecutive failed pings before considering the device offline",
+                    "ping_requests_per_attempt": "Number of ping packets sent for each reachability check attempt",
                     "ping_interval": "Time between ping checks",
                     "ping_method": "Select the ping method to use for monitoring"
                 }

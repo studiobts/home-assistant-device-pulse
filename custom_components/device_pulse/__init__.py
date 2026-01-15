@@ -33,10 +33,12 @@ from .const import (
     CONF_GROUP_DEVICE_NAME,
     CONF_GROUP_DEVICE_HOST,
     CONF_PING_ATTEMPTS_BEFORE_FAILURE,
+    CONF_PING_REQUESTS_PER_ATTEMPT,
     CONF_PING_INTERVAL,
     CONF_PING_METHOD,
     CONF_SELECTED_DEVICES,
     DEFAULT_PING_ATTEMPTS_BEFORE_FAILURE,
+    DEFAULT_PING_REQUESTS_PER_ATTEMPT,
     DEFAULT_PING_INTERVAL,
     DEFAULT_PING_METHOD,
     DEVICE_SELECTION_ALL,
@@ -209,10 +211,12 @@ async def async_setup_entry(
         config_entry.runtime_data = ConfigEntryRuntimeData(integration)
 
         ping_attempts_before_failure: int = int(config_entry.options.get(CONF_PING_ATTEMPTS_BEFORE_FAILURE, DEFAULT_PING_ATTEMPTS_BEFORE_FAILURE))
+        ping_requests_per_attempt: int = int(config_entry.options.get(CONF_PING_REQUESTS_PER_ATTEMPT, DEFAULT_PING_REQUESTS_PER_ATTEMPT))
         ping_interval: int = int(config_entry.options.get(CONF_PING_INTERVAL, DEFAULT_PING_INTERVAL))
         ping_method: str = config_entry.options.get(CONF_PING_METHOD, DEFAULT_PING_METHOD)
 
         _LOGGER.info("[%s]   Attempts Before Failure: %d", integration.friendly_name, ping_attempts_before_failure)
+        _LOGGER.info("[%s]   Requests per Attempt: %d", integration.friendly_name, ping_requests_per_attempt)
         _LOGGER.info("[%s]   Interval: %ds", integration.friendly_name, ping_interval)
         _LOGGER.info("[%s]   Ping Method: %s", integration.friendly_name, ping_method)
         _LOGGER.info("[%s] Found [%d] valid devices", integration.friendly_name, len(devices))
@@ -255,9 +259,9 @@ async def async_setup_entry(
                 # For ARP ping, check if device ip address is in local subnet,
                 # otherwise fallback to ICMP ping
                 if ping_arp and (resolved_ip := await utils.is_host_in_local_subnet(hass, host)):
-                    ping_instance = PingDataARP(hass, resolved_ip, 1)
+                    ping_instance = PingDataARP(hass, resolved_ip, ping_requests_per_attempt)
                 else:
-                    ping_instance = ping_icmp(hass, host, 1, ping_icmp_privileged)
+                    ping_instance = ping_icmp(hass, host, ping_requests_per_attempt, ping_icmp_privileged)
 
                 coordinator = DevicePingCoordinator(
                     hass,
@@ -267,6 +271,7 @@ async def async_setup_entry(
                     host_source,
                     ping_instance,
                     ping_attempts_before_failure,
+                    ping_requests_per_attempt,
                     ping_interval
                 )
                 await coordinator.async_config_entry_first_refresh()
