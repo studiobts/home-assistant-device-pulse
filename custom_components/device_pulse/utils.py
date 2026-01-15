@@ -435,7 +435,7 @@ async def is_host_in_local_subnet(hass: HomeAssistant, host: str) -> bool | str:
         return False
 
 
-async def check_devices_support_arp_ping(
+async def check_integration_devices_support_arp_ping(
     hass: HomeAssistant, devices: list[dr.DeviceEntry], zc: zeroconf.models.HaZeroconf
 ) -> tuple[bool, str | None]:
     """Check if at least one device in the list supports ARP ping (is in the local subnet).
@@ -456,3 +456,21 @@ async def check_devices_support_arp_ping(
 
     return False, "no_local_devices"
 
+async def check_custom_group_devices_support_arp_ping(hass: HomeAssistant, devices: list[dict]) -> tuple[bool, str | None]:
+    """Check if any device in the custom group supports ARP ping
+
+    Returns:
+        tuple[bool, str | None]: (supports_arp, reason_if_not_supported)
+    """
+    # First, check if arping is available
+    if not await is_arping_available(hass):
+        _LOGGER.debug("arping not available, ARP ping not supported")
+        return False, "arping_not_installed"
+
+    # Then check if any device is in the local subnet
+    for device in devices:
+        host = device.get(CONF_GROUP_DEVICE_HOST)
+        if host and await is_host_in_local_subnet(hass, host):
+            return True, None
+
+    return False, "no_local_devices"

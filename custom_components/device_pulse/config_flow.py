@@ -52,12 +52,11 @@ from .const import (
 )
 from .utils import (
     IntegrationData,
-    check_devices_support_arp_ping,
+    check_custom_group_devices_support_arp_ping,
+    check_integration_devices_support_arp_ping,
     format_duration,
     get_integration_devices_valid,
     get_valid_integrations_for_monitoring,
-    is_arping_available,
-    is_host_in_local_subnet,
     is_valid_hostname_or_ip,
 )
 
@@ -286,7 +285,7 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
             from homeassistant.components import zeroconf
             zc = await zeroconf.async_get_instance(self.hass)
             self.integration_supports_arp, self.integration_arp_unavailable_reason = (
-                await check_devices_support_arp_ping(
+                await check_integration_devices_support_arp_ping(
                     self.hass, self.integration_available_devices, zc
                 )
             )
@@ -361,7 +360,7 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
                     ]
 
                 self.integration_supports_arp, self.integration_arp_unavailable_reason = (
-                    await check_devices_support_arp_ping(
+                    await check_integration_devices_support_arp_ping(
                         self.hass, devices_to_check, zc
                     )
                 )
@@ -539,22 +538,9 @@ class DevicePingMonitorBaseFlow(abc.ABC, _FlowProtocol):
                 return await self.async_step_custom_group_add_device()
 
             # Check if any device in the custom group supports ARP ping
-            # First, check if arping is available
-            if not await is_arping_available(self.hass):
-                self.integration_supports_arp = False
-                self.integration_arp_unavailable_reason = "arping_not_installed"
-            else:
-                # Then check if any device is in the local subnet
-                self.integration_supports_arp = False
-                for device in self.custom_group_devices:
-                    host = device.get(CONF_GROUP_DEVICE_HOST)
-                    if host and await is_host_in_local_subnet(self.hass, host):
-                        self.integration_supports_arp = True
-                        self.integration_arp_unavailable_reason = None
-                        break
-
-                if not self.integration_supports_arp:
-                    self.integration_arp_unavailable_reason = "no_local_devices"
+            self.integration_supports_arp, self.integration_arp_unavailable_reason = (
+                await check_custom_group_devices_support_arp_ping(self.hass, self.custom_group_devices)
+            )
 
             return await self.async_step_monitor_parameters()
 
@@ -820,6 +806,10 @@ class DevicePingMonitorOptionsFlow(
         elif self.entry_type == ENTRY_TYPE_CUSTOM_GROUP:
             self.custom_group_name = self.config_entry.options.get(CONF_GROUP_NAME)
             self.custom_group_devices = copy.deepcopy(self.config_entry.options.get(CONF_GROUP_DEVICES_LIST))
+
+            self.integration_supports_arp, self.integration_arp_unavailable_reason = (
+                await check_custom_group_devices_support_arp_ping(self.hass, self.custom_group_devices)
+            )
 
             return await self.async_step_custom_group_edit_action(user_input)
 
