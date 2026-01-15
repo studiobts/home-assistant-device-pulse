@@ -113,8 +113,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             "Install iputils-arping package to enable ARP ping functionality"
         )
 
+    zc = await zeroconf.async_get_instance(hass)
     # Build initial list of integrations valid for monitoring
-    integrations = await utils.get_valid_integrations_for_monitoring(hass)
+    integrations = await utils.get_valid_integrations_for_monitoring(hass, zc)
     _LOGGER.info("Found %d valid integrations for monitoring: %s",
         len(integrations),
         [integration.friendly_name for integration in integrations.values()]
@@ -165,7 +166,7 @@ async def async_setup_entry(
             hass.data[DATA_CONFIG_KEY].monitored.update({domain: ConfigMonitoredIntegrationData(domain, config_entry.entry_id)})
             # If domain is not into cached integrations list, update it
             if not domain in hass.data[DATA_CONFIG_KEY].integrations:
-                hass.data[DATA_CONFIG_KEY].integrations = await utils.get_valid_integrations_for_monitoring(hass)
+                hass.data[DATA_CONFIG_KEY].integrations = await utils.get_valid_integrations_for_monitoring(hass, zc)
             # Get integration data
             integration = hass.data[DATA_CONFIG_KEY].integrations[domain]
 

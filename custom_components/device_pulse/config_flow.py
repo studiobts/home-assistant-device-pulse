@@ -7,6 +7,7 @@ from typing import Any, Protocol, runtime_checkable
 import voluptuous as vol
 
 from homeassistant import config_entries
+from homeassistant.components import zeroconf
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import selector
 import homeassistant.helpers.device_registry as dr
@@ -658,7 +659,8 @@ class DevicePingMonitorConfigFlow(
     async def async_step_integration_choice(self, user_input: dict[str, Any] | None = None):
         errors = {}
 
-        self.available_integrations = await get_valid_integrations_for_monitoring(self.hass)
+        zc = await zeroconf.async_get_instance(self.hass)
+        self.available_integrations = await get_valid_integrations_for_monitoring(self.hass, zc)
 
         if not self.available_integrations:
             return self.async_abort(reason="no_supported_integrations")
@@ -796,7 +798,8 @@ class DevicePingMonitorOptionsFlow(
         self.sensors_last_response_time_enabled = self.config_entry.options.get(CONF_SENSORS_LAST_RESPONSE_TIME_ENABLED, DEFAULT_SENSORS_LAST_RESPONSE_TIME_ENABLED)
 
         if self.entry_type == ENTRY_TYPE_INTEGRATION:
-            self.available_integrations = await get_valid_integrations_for_monitoring(self.hass)
+            zc = await zeroconf.async_get_instance(self.hass)
+            self.available_integrations = await get_valid_integrations_for_monitoring(self.hass, zc)
             self.integration_selected = self.available_integrations.get(self.config_entry.data.get(CONF_INTEGRATION))
             self.integration_device_selection_mode = self.config_entry.options.get(CONF_DEVICE_SELECTION_MODE, DEVICE_SELECTION_ALL)
             self.integration_selected_devices = copy.deepcopy(self.config_entry.options.get(CONF_SELECTED_DEVICES, []))

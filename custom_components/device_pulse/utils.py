@@ -40,10 +40,9 @@ class IntegrationData:
     device_count: int
     custom_group: bool
 
-async def get_valid_integrations_for_monitoring(hass: HomeAssistant) -> dict[str, IntegrationData]:
+async def get_valid_integrations_for_monitoring(hass: HomeAssistant, zc: zeroconf.models.HaZeroconf) -> dict[str, IntegrationData]:
     """Find all integrations that have devices with a hostname or IP address in the configuration."""
     device_registry = dr.async_get(hass)
-    zc = await zeroconf.async_get_instance(hass)
     integrations: dict[str, IntegrationData] = {}
 
     all_devices = list(device_registry.devices.values())
