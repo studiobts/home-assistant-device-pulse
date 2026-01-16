@@ -32,10 +32,10 @@ class PingDataARP:
             self._adapter, _, __ = await get_network_adapter_for_ip(self.hass, self.ip_address)
 
         # Use arping command to check if the host responds to ARP
-        # -c: count,
-        # -w: timeout in seconds
+        # -f: quit on first reply
+        # -c: count, number of requests to send
         # -I: interface
-        cmd = ["arping", "-c", str(self.count), "-w", str(ARP_TIMEOUT), "-I", self._adapter.get("name"), self.ip_address]
+        cmd = ["arping", "-f", "-c", str(self.count), "-I", self._adapter.get("name"), self.ip_address]
 
         try:
             process = await asyncio.create_subprocess_exec(
@@ -44,7 +44,7 @@ class PingDataARP:
                 stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await asyncio.wait_for(
-                process.communicate(), timeout=(ARP_TIMEOUT * 3)
+                process.communicate(), timeout=(ARP_TIMEOUT * self.count * 2)
             )
 
             # arping returns 0 if at least one response was received
