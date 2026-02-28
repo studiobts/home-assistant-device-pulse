@@ -178,6 +178,9 @@ At the moment, the following custom resolvers are implemented:
 - Tasmota
 - LocalTuya
 - Open Sprinkler
+- Jellyfin
+- Pi-hole
+- qBittorrent
 
 ## Requesting a New Host Resolver
 
