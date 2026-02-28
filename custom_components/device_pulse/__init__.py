@@ -100,6 +100,29 @@ class ConfigEntryRuntimeData:
     reload_task: asyncio.Task[Any] | None = None
 
 
+async def _async_get_or_create_integration(
+    hass: HomeAssistant, domain: str, zc: zeroconf.models.HaZeroconf | None = None
+) -> utils.IntegrationData:
+    """Return integration data, refreshing the cache or creating a fallback."""
+    integrations = hass.data[DATA_CONFIG_KEY].integrations
+    if integration := integrations.get(domain):
+        return integration
+
+    if zc is None:
+        zc = await zeroconf.async_get_instance(hass)
+
+    integrations = await utils.get_valid_integrations_for_monitoring(hass, zc)
+    hass.data[DATA_CONFIG_KEY].integrations = integrations
+
+    if integration := integrations.get(domain):
+        return integration
+
+    friendly_name = await utils.async_get_integration_name(hass, domain)
+    integration = utils.IntegrationData(domain, friendly_name, 0, False)
+    integrations[domain] = integration
+    return integration
+
+
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the integration."""
     # Determine if privileged ICMP ping is available
@@ -167,14 +190,14 @@ async def async_setup_entry(
             # Push monitored domain to hass data
             hass.data[DATA_CONFIG_KEY].monitored.update({domain: ConfigMonitoredIntegrationData(domain, config_entry.entry_id)})
             # If domain is not into cached integrations list, update it
-            if not domain in hass.data[DATA_CONFIG_KEY].integrations:
+            if domain not in hass.data[DATA_CONFIG_KEY].integrations:
                 hass.data[DATA_CONFIG_KEY].integrations = await utils.get_valid_integrations_for_monitoring(hass, zc)
                 _LOGGER.info("Update cache: found %d valid integrations for monitoring: %s",
                     len(hass.data[DATA_CONFIG_KEY].integrations),
                     [integration.friendly_name for integration in hass.data[DATA_CONFIG_KEY].integrations.values()]
                 )
-            # Get integration data
-            integration = hass.data[DATA_CONFIG_KEY].integrations[domain]
+            # Get integration data (fallback if still missing)
+            integration = await _async_get_or_create_integration(hass, domain, zc)
 
             device_mode = config_entry.options.get(CONF_DEVICE_SELECTION_MODE, DEVICE_SELECTION_ALL)
             selected_devices = config_entry.options.get(CONF_SELECTED_DEVICES, [])
@@ -392,7 +415,11 @@ async def _device_registry_updated(
     primary_config_entry = hass.config_entries.async_get_entry(device_entry.primary_config_entry)
     # Check if the device belongs to a monitored integration
     belongs_to_integration = primary_config_entry and primary_config_entry.domain in monitored.keys()
-    integration = integrations[primary_config_entry.domain] if belongs_to_integration else None
+    integration = (
+        await _async_get_or_create_integration(hass, primary_config_entry.domain)
+        if belongs_to_integration
+        else None
+    )
 
     if action == "create" and belongs_to_integration:
         # New device for monitored integration, reload configuration
@@ -425,7 +452,7 @@ async def _device_registry_updated(
 
             # Devices belonged to monitored integration
             if belonged_to_integration:
-                integration = integrations[belonged_to_integration]
+                integration = await _async_get_or_create_integration(hass, belonged_to_integration)
 
                 _LOGGER.info(
                     "[%s] Device [%s] no more belongs to integration, "
@@ -581,4 +608,3 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Handle removal of an entry."""
-

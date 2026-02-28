@@ -32,6 +32,16 @@ from .host_resolvers import resolve as resolve_host
 
 _LOGGER = logging.getLogger(__name__)
 
+
+async def async_get_integration_name(hass: HomeAssistant, domain: str) -> str:
+    """Return the friendly name for an integration."""
+    try:
+        integration = await async_get_integration(hass, domain)
+    except Exception:  # noqa: BLE001
+        return domain.replace("_", " ").title()
+    else:
+        return integration.name
+
 @dataclass
 class IntegrationData:
     """Holds integration data."""
@@ -47,14 +57,6 @@ async def get_valid_integrations_for_monitoring(hass: HomeAssistant, zc: zerocon
 
     all_devices = list(device_registry.devices.values())
 
-    async def _get_integration_name(domain: str) -> str:
-        try:
-            integration = await async_get_integration(hass, domain)
-        except Exception:  # noqa: BLE001
-            return domain.replace("_", " ").title()
-        else:
-            return integration.name
-
     for device in all_devices:
         if not is_device_valid_for_monitoring(hass, device_registry, device):
             continue
@@ -65,7 +67,7 @@ async def get_valid_integrations_for_monitoring(hass: HomeAssistant, zc: zerocon
 
         if host and device_config_entry.domain not in integrations:
             # Get the friendly name of the integration
-            friendly_name = await _get_integration_name(device_config_entry.domain)
+            friendly_name = await async_get_integration_name(hass, device_config_entry.domain)
             integrations[device_config_entry.domain] = IntegrationData(device_config_entry.domain, friendly_name, 0, False)
 
         if host:
