@@ -52,7 +52,7 @@ class AllDevicesOnlineStatusSensor(BinarySensorEntity, NetworkStatusEntity):
         # device offline, in this case we have to do a full update in order to
         # be sure that all monitored device are online before change status
         elif state == "on" and self._attr_is_on:
-            self.hass.async_create_task(self._update())
+            self._async_schedule_update()
 
     async def _update(self) -> None:
         """Update the status based on all ping sensors."""

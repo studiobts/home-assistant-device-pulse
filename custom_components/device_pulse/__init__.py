@@ -1,6 +1,7 @@
 """Device Pulse Integration."""
 
 import asyncio
+import contextlib
 from dataclasses import dataclass, field
 from functools import partial
 import logging
@@ -8,10 +9,15 @@ from typing import Any
 
 import voluptuous as vol
 
-from homeassistant.config_entries import SIGNAL_CONFIG_ENTRY_CHANGED, ConfigEntryChange
-from homeassistant.components.ping import PingDataICMPLib, PingDataSubProcess, _can_use_icmp_lib_with_privilege
+from homeassistant.config_entries import (
+    SIGNAL_CONFIG_ENTRY_CHANGED,
+    ConfigEntry,
+    ConfigEntryChange,
+    ConfigEntryState,
+)
+from homeassistant.components.ping import PingDataICMPLib, _can_use_icmp_lib_with_privilege
+from .ping_clients import ReapingPingDataSubProcess
 from homeassistant.components import zeroconf
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_ENTITY_ID,
     ATTR_DEVICE_ID,
@@ -358,10 +364,13 @@ async def async_setup_entry(
         _LOGGER.info("[%s]   Device Offline Log Level: %s",integration.friendly_name, logging.getLevelName(log_level_device_offline))
         _LOGGER.info("[%s] Found [%d] valid devices", integration.friendly_name, len(devices))
 
-        # Determine the ICMP ping client based on method and privileges
-        ping_icmp: type[PingDataICMPLib | PingDataSubProcess]
+        # Determine the ICMP ping client based on method and privileges.
+        # Use ReapingPingDataSubProcess (instead of the core PingDataSubProcess)
+        # when pinging via the subprocess so that the child "ping" process is
+        # killed when the refresh task gets cancelled on unload/reload/shutdown.
+        ping_icmp: type[PingDataICMPLib | ReapingPingDataSubProcess]
         ping_icmp_privileged = hass.data[DATA_CONFIG_KEY].ping_icmp_privileged
-        ping_icmp = PingDataSubProcess if ping_icmp_privileged is None else PingDataICMPLib
+        ping_icmp = ReapingPingDataSubProcess if ping_icmp_privileged is None else PingDataICMPLib
 
         ping_arp: type[PingDataARP] | None = None
         if ping_method == PING_METHOD_ARP:
@@ -649,18 +658,32 @@ async def _device_registry_updated(
     if reload:
         _LOGGER.info("[%s] Reloading config entry", integration.friendly_name)
         config_entry = hass.config_entries.async_get_entry(monitored[integration.domain].config_entry_id)
+        if config_entry is None:
+            return
 
-        # Prevent multiple reloads
+        # Prevent multiple reloads. The task is created as a config entry
+        # background task so that the core cancels it automatically when the
+        # entry is unloaded (during a reload/restart). This avoids a stale
+        # reload firing against an already unloaded entry.
         if config_entry.runtime_data.reload_task:
             config_entry.runtime_data.reload_task.cancel()
 
         # Schedule reload with a small delay
         async def delayed_reload() -> None:
             await asyncio.sleep(2)
+            # Skip the reload if the entry is no longer loaded (e.g. the
+            # entry was removed/disabled or HA is shutting down meanwhile).
+            if hass.is_stopping or config_entry.state != ConfigEntryState.LOADED:
+                return
             await hass.config_entries.async_reload(config_entry.entry_id)
             _LOGGER.info("[%s] Config entry reloaded!", integration.friendly_name)
 
-        config_entry.runtime_data.reload_task = hass.async_create_task(delayed_reload())
+        config_entry.runtime_data.reload_task = config_entry.async_create_background_task(
+            hass,
+            delayed_reload(),
+            name=f"Device Pulse reload {integration.friendly_name}",
+            eager_start=True,
+        )
 
 
 async def _state_changed(
@@ -718,6 +741,15 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if entry.data.get(CONF_ENTRY_TYPE) == ENTRY_TYPE_INTEGRATION:
         domain = entry.data.get(CONF_INTEGRATION)
         hass.data[DATA_CONFIG_KEY].monitored.pop(domain)
+
+    # Cancel any pending reload task so it does not fire against an entry that
+    # is being (or has just been) unloaded.
+    reload_task = getattr(entry, "runtime_data", None) and entry.runtime_data.reload_task
+    if reload_task:
+        entry.runtime_data.reload_task = None
+        reload_task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await reload_task
 
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 

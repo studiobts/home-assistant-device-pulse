@@ -74,6 +74,15 @@ class DevicePingCoordinator(DataUpdateCoordinator[PingResult]):
         self._log_level_failed_pings = log_level_failed_pings
         self._log_level_device_offline = log_level_device_offline
 
+        # Backoff handling: once a device has been failing for more than
+        # ping_attempts_before_failure consecutive polls we slow the polling
+        # down (up to ping_interval * backoff_max_factor) instead of spawning
+        # a subprocess at full rate forever. The interval is restored as soon
+        # as the device responds again.
+        self._backoff_max_factor = 4
+        self._base_ping_interval_ms = ping_interval * 1000
+        self._active_backoff_factor = 1
+
         # Remove unnecessary logs from inner coordinator methods
         if _LOGGER.isEnabledFor(logging.DEBUG):
             inner_logger = logging.getLogger(f"%s.inner" % __name__)
@@ -92,9 +101,6 @@ class DevicePingCoordinator(DataUpdateCoordinator[PingResult]):
     async def _async_update_data(self) -> PingResult:
         """Fetch data from ping."""
         await self.ping.async_update()
-
-        # Adjust the next update interval
-        self.update_interval = self._calculate_update_interval()
 
         is_alive = True
 
@@ -124,6 +130,15 @@ class DevicePingCoordinator(DataUpdateCoordinator[PingResult]):
             self.last_response_time = (
                 round(self.ping.data.get("avg"), 3) if self.ping.data else None
             )
+            # Device responded again: restore the base polling interval.
+            if self._active_backoff_factor != 1:
+                self._active_backoff_factor = 1
+                _LOGGER.info(
+                    "[%s] Device [%s][%s] back online, polling interval restored",
+                    self.integration.friendly_name,
+                    self.device_entry.name,
+                    self.ping.ip_address,
+                )
             _LOGGER.debug(
                 "[%s] Device [%s][%s] ping successful, response time: %sms",
                 self.integration.friendly_name,
@@ -138,6 +153,26 @@ class DevicePingCoordinator(DataUpdateCoordinator[PingResult]):
             self.failed_pings += 1
             self.total_failed_pings += 1
             self.last_response_time = None
+
+            # Once the failure threshold has been exceeded, slow the polling
+            # down instead of spawning a subprocess at full rate forever. The
+            # interval grows linearly with the number of extra consecutive
+            # failures up to ping_interval * backoff_max_factor.
+            if self.failed_pings > self.ping_attempts_before_failure:
+                extra = self.failed_pings - self.ping_attempts_before_failure
+                factor = min(extra + 1, self._backoff_max_factor)
+                if factor != self._active_backoff_factor:
+                    self._active_backoff_factor = factor
+                    _LOGGER.log(
+                        self._log_level_failed_pings,
+                        "[%s] Device [%s][%s] slowing down polling "
+                        "(interval x%d) after %d consecutive failures",
+                        self.integration.friendly_name,
+                        self.device_entry.name,
+                        self.ping.ip_address,
+                        factor,
+                        self.failed_pings,
+                    )
 
             _LOGGER.log(
                 self._log_level_failed_pings,
@@ -199,6 +234,9 @@ class DevicePingCoordinator(DataUpdateCoordinator[PingResult]):
         if self._first_update:
             self._first_update = False
 
+        # Adjust the next update interval based on the current backoff state.
+        self.update_interval = self._calculate_update_interval()
+
         return PingResult(
             is_alive=is_alive,
             ip_address=self.ping.ip_address,
@@ -225,9 +263,14 @@ class DevicePingCoordinator(DataUpdateCoordinator[PingResult]):
         })
 
     def _calculate_update_interval(self) -> timedelta:
-        """Calculate next update interval with jitter to distribute requests evenly."""
-        variation = self.ping_interval * 0.05  # 5% variation
-        jittered_interval = self.ping_interval + random.uniform(-variation, variation)
+        """Calculate next update interval with jitter to distribute requests evenly.
+
+        When the device has been failing for more than the failure threshold,
+        the base interval is multiplied by the active backoff factor.
+        """
+        base_interval = self._base_ping_interval_ms * self._active_backoff_factor
+        variation = base_interval * 0.05  # 5% variation
+        jittered_interval = base_interval + random.uniform(-variation, variation)
 
         return timedelta(milliseconds=jittered_interval)
 

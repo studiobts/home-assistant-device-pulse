@@ -35,15 +35,26 @@ class NetworkStatusEntity(Entity, ABC):
         self.hass = hass
         self.config_entry: ConfigEntry | None = config_entry
         self.integration: IntegrationData = config_entry.runtime_data.integration if config_entry else None
+        # Track a single in-flight _update task per entity so bursts of events
+        # (e.g. mass entity registry churn during a reload/restart) do not pile
+        # up one task per event.
+        self._update_task: asyncio.Task | None = None
 
     async def async_added_to_hass(self) -> None:
         """Register callbacks when entity is added."""
 
         async def initial_update() -> None:
             await asyncio.sleep(5)
-            await self._update()
+            self._async_schedule_update()
 
-        self.hass.async_create_task(initial_update())
+        # Track the initial update so it is cancelled when the entity is
+        # removed during an unload/reload.
+        initial_update_task = self.hass.async_create_task(initial_update())
+
+        def cancel_initial_update() -> None:
+            initial_update_task.cancel()
+
+        self.async_on_remove(cancel_initial_update)
 
         self.async_on_remove(
             self.hass.bus.async_listen(
@@ -59,6 +70,35 @@ class NetworkStatusEntity(Entity, ABC):
             )
         )
 
+        # Make sure a pending _update task does not outlive the entity when it
+        # is removed during an unload/reload.
+        self.async_on_remove(self._async_cancel_update_task)
+
+    @callback
+    def _async_cancel_update_task(self) -> None:
+        """Cancel a pending update task, if any."""
+        if self._update_task is not None:
+            self._update_task.cancel()
+            self._update_task = None
+
+    @callback
+    def _async_schedule_update(self) -> None:
+        """Schedule a single _update run.
+
+        If an update is already scheduled or in-flight, this is a no-op to
+        coalesce bursts of events into a single run.
+        """
+        if self._update_task is not None and not self._update_task.done():
+            return
+
+        self._update_task = self.hass.async_create_task(self._async_run_update())
+
+    async def _async_run_update(self) -> None:
+        """Run _update and clear the task reference when done."""
+        try:
+            await self._update()
+        finally:
+            self._update_task = None
 
     @callback
     def _entity_registry_updated(self, event: Event) -> None:
@@ -80,12 +120,12 @@ class NetworkStatusEntity(Entity, ABC):
                     action,
                     entity_id,
                 )
-                self.hass.async_create_task(self._update())
+                self._async_schedule_update()
         elif action == "remove":
             _LOGGER.debug(
                 "Entity Registry event [%s] for [%s], updating count", action, entity_id
             )
-            self.hass.async_create_task(self._update())
+            self._async_schedule_update()
 
     @abstractmethod
     @callback

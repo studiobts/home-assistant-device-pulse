@@ -60,7 +60,7 @@ class TotalDevicesDisconnectedCountSensor(SensorEntity, NetworkStatusEntity):
             if self.config_entry.entry_id != entity_entry.config_entry_id:
                 return
 
-        self.hass.async_create_task(self._update())
+        self._async_schedule_update()
 
     async def _update(self) -> None:
         """Update the count of offline devices."""

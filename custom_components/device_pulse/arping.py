@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from contextlib import suppress
 import logging
 from typing import Any
 
@@ -37,6 +38,7 @@ class PingDataARP:
         # -I: interface
         cmd = ["arping", "-f", "-c", str(self.count), "-I", self._adapter.get("name"), self.ip_address]
 
+        process = None
         try:
             process = await asyncio.create_subprocess_exec(
                 *cmd,
@@ -66,6 +68,19 @@ class PingDataARP:
             self.is_alive = False
             self.data = None
             _LOGGER.debug("ARP ping to %s timed out", self.ip_address)
+            # Make sure the arping child is reaped after the timeout
+            if process is not None and process.returncode is None:
+                with suppress(TypeError, ProcessLookupError):
+                    process.kill()
+        except asyncio.CancelledError:
+            # The refresh task was cancelled (e.g. config entry unload/reload
+            # or shutdown): kill the arping child instead of leaking it.
+            self.is_alive = False
+            self.data = None
+            if process is not None and process.returncode is None:
+                with suppress(TypeError, ProcessLookupError):
+                    process.kill()
+            raise
         except FileNotFoundError:
             _LOGGER.error("arping command not found. Please install iputils-arping package")
             self.is_alive = False
