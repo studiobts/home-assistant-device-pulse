@@ -1,4 +1,5 @@
 """Utility functions for Device Pulse integration."""
+import asyncio
 from dataclasses import dataclass
 import ipaddress
 import logging
@@ -55,24 +56,37 @@ async def get_valid_integrations_for_monitoring(hass: HomeAssistant, zc: zerocon
     device_registry = dr.async_get(hass)
     integrations: dict[str, IntegrationData] = {}
 
-    all_devices = list(device_registry.devices.values())
+    valid_devices = [
+        device
+        for device in device_registry.devices.values()
+        if is_device_valid_for_monitoring(hass, device_registry, device)
+    ]
+    device_config_entries = [
+        hass.config_entries.async_get_entry(device.primary_config_entry)
+        for device in valid_devices
+    ]
 
-    for device in all_devices:
-        if not is_device_valid_for_monitoring(hass, device_registry, device):
+    # Host resolution can hit the network (e.g. a live zeroconf query with its
+    # own timeout per device); run it for all devices concurrently instead of
+    # one at a time so N devices don't cost N * that timeout in the worst case.
+    hosts = await asyncio.gather(
+        *(
+            extract_device_host(hass, device, zc, device_config_entry)
+            for device, device_config_entry in zip(valid_devices, device_config_entries)
+        )
+    )
+
+    for device_config_entry, (host, _) in zip(device_config_entries, hosts):
+        if not host:
             continue
-        # Get the primary config entry for the device
-        device_config_entry = hass.config_entries.async_get_entry(device.primary_config_entry)
-        # Check if the configuration contains a valid Host parameter
-        host, _ = await extract_device_host(hass, device, zc, device_config_entry)
 
-        if host and device_config_entry.domain not in integrations:
+        if device_config_entry.domain not in integrations:
             # Get the friendly name of the integration
             friendly_name = await async_get_integration_name(hass, device_config_entry.domain)
             integrations[device_config_entry.domain] = IntegrationData(device_config_entry.domain, friendly_name, 0, False)
 
-        if host:
-            # Increment the device count for the integration
-            integrations[device_config_entry.domain].device_count += 1
+        # Increment the device count for the integration
+        integrations[device_config_entry.domain].device_count += 1
 
     return integrations
 
